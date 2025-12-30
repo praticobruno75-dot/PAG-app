@@ -1,0 +1,1992 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PAG Consulente - Gestione Profili</title>
+<!-- PWA Manifest -->
+<link rel="manifest" href="./manifest.json">
+<meta name="theme-color" content="#f5a623">
+<link rel="icon" href="./icons/icon-512.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="PAG">
+<link rel="apple-touch-icon" href="./icons/icon-512.png">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+      background: #3f3f3f;
+      color: #f5f5f5;
+      margin: 0;
+      padding: 24px;
+    }
+    
+    .brand {
+      text-align: center;
+      margin-bottom: 30px;
+      padding-top: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+    .brand a {
+      color: #ba975c;
+      text-decoration: none;
+      font-size: 28px;
+      font-weight: bold;
+      letter-spacing: 2px;
+      transition: opacity 0.3s;
+    }
+    .brand a:hover {
+      opacity: 0.8;
+    }
+    
+    h1 { text-align: center; margin-bottom: 8px; margin-top: 20px; }
+    h2 { margin-top: 0; }
+    p.subtitle { text-align: center; margin-top: 0; opacity: 0.8; }
+    
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    
+    .panel {
+      background: #2f2f2f;
+      padding: 20px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+    }
+    
+    .field {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    .field label { flex: 1; }
+    .field input {
+      width: 200px;
+      padding: 8px;
+      border-radius: 6px;
+      border: none;
+    }
+    
+    .category-buttons {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+      margin: 20px 0;
+    }
+    
+    .category-btn {
+      padding: 30px;
+      border: none;
+      border-radius: 12px;
+      background: #2f2f2f;
+      color: #f5f5f5;
+      font-size: 20px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    
+    .category-btn:hover {
+      background: #4f4f4f;
+      transform: translateY(-2px);
+    }
+    
+    button {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      background: #f5a623;
+      color: #000;
+      font-weight: bold;
+      cursor: pointer;
+      margin-right: 10px;
+      margin-top: 10px;
+    }
+    
+    button:hover { background: #ffb84d; }
+    
+    button.secondary {
+      background: #555;
+      color: #f5f5f5;
+    }
+    
+    button.secondary:hover {
+      background: #666;
+    }
+    
+    .item-list {
+      margin-top: 20px;
+      max-height: 400px;
+      overflow-y: auto;
+      padding-right: 5px;
+    }
+    
+    .item-list::-webkit-scrollbar {
+      width: 8px;
+    }
+    
+    .item-list::-webkit-scrollbar-track {
+      background: #3f3f3f;
+      border-radius: 4px;
+    }
+    
+    .item-list::-webkit-scrollbar-thumb {
+      background: #f5a623;
+      border-radius: 4px;
+    }
+    
+    .item-list::-webkit-scrollbar-thumb:hover {
+      background: #ffb84d;
+    }
+    
+    .item {
+      background: #3f3f3f;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    
+    .item:hover {
+      background: #4a4a4a;
+    }
+    
+    .item-info {
+      flex: 1;
+    }
+    
+    .item-info strong {
+      display: block;
+      margin-bottom: 4px;
+      font-size: 16px;
+    }
+    
+    .item-info small {
+      opacity: 0.7;
+    }
+    
+    .item-actions button {
+      margin: 0 5px;
+    }
+    
+    .hidden {
+      display: none;
+    }
+    
+    .breadcrumb {
+      margin-bottom: 20px;
+      opacity: 0.8;
+      font-size: 14px;
+    }
+    
+    .breadcrumb span {
+      margin: 0 5px;
+    }
+    
+    .chart-container {
+      position: relative;
+      height: 400px;
+      margin: 20px 0;
+    }
+    
+    .mini-chart-container {
+      background: #3f3f3f;
+      padding: 15px;
+      border-radius: 8px;
+      text-align: center;
+    }
+    
+    .mini-chart-container canvas {
+      max-width: 100%;
+      height: 200px !important;
+    }
+    
+    .mini-chart-date {
+      margin-top: 10px;
+      font-weight: bold;
+      color: #f5a623;
+    }
+    
+    .mini-chart-desc {
+      font-size: 14px;
+      opacity: 0.8;
+      margin-top: 5px;
+    }
+    
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+      margin-top: 20px;
+    }
+    
+    .stats-column {
+      background: #3f3f3f;
+      padding: 15px;
+      border-radius: 8px;
+    }
+    
+    .stats-column h3 {
+      text-align: center;
+      margin-top: 0;
+      margin-bottom: 15px;
+      color: #f5a623;
+      font-size: 16px;
+      min-height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .stat-card {
+      background: #2f2f2f;
+      padding: 15px;
+      border-radius: 8px;
+      text-align: center;
+      margin-bottom: 10px;
+    }
+    
+    .stat-card:last-child {
+      margin-bottom: 0;
+    }
+    
+    .stat-number {
+      font-size: 32px;
+      font-weight: bold;
+      color: #f5a623;
+      margin-bottom: 5px;
+    }
+    
+    .stat-label {
+      font-size: 14px;
+      opacity: 0.8;
+    }
+    
+    .notes-area {
+      width: 100%;
+      min-height: 120px;
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid #555;
+      background: #3f3f3f;
+      color: #f5f5f5;
+      font-family: Arial, sans-serif;
+      font-size: 14px;
+      resize: vertical;
+      margin-top: 10px;
+    }
+    
+    .appointment-item {
+      background: #3f3f3f;
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .appointment-input {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr auto;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    
+    .appointment-input input {
+      padding: 8px;
+      border-radius: 6px;
+      border: 1px solid #555;
+      background: #3f3f3f;
+      color: #f5f5f5;
+    }
+    
+    .profile-card {
+      background: #3f3f3f;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 15px;
+    }
+    
+    .profile-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    
+    .profile-values {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      font-size: 14px;
+    }
+    
+    .profile-value {
+      display: flex;
+      justify-content: space-between;
+    }
+    
+    input[type="file"] {
+      display: none;
+    }
+    
+    .file-upload-btn {
+      display: inline-block;
+      padding: 10px 20px;
+      background: #f5a623;
+      color: #000;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      margin-top: 10px;
+    }
+    
+    .file-upload-btn:hover {
+      background: #ffb84d;
+    }
+    
+    /* Carosello mobile */
+    .carousel-container {
+      position: relative;
+      overflow: hidden;
+      width: 100%;
+    }
+    
+    .carousel-track {
+      display: flex;
+      transition: transform 0.3s ease;
+    }
+    
+    .carousel-item {
+      min-width: 100%;
+      flex-shrink: 0;
+    }
+    
+    .carousel-nav {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 15px;
+    }
+    
+    .carousel-btn {
+      background: #555;
+      color: #f5f5f5;
+      border: none;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .carousel-btn:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+    
+    .carousel-indicator {
+      color: #ba975c;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+    }
+    
+    /* RESPONSIVE MOBILE */
+    @media (max-width: 768px) {
+      body {
+        padding: 12px;
+      }
+      
+      .container {
+        max-width: 100%;
+      }
+      
+      .panel {
+        padding: 15px;
+      }
+      
+      .field {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 8px;
+      }
+      
+      .field label {
+        width: 100%;
+        text-align: left;
+      }
+      
+      .field input,
+      .field select {
+        width: 100% !important;
+        max-width: 100%;
+        min-width: 0;
+      }
+      
+      .field input[type="number"] {
+        width: 100% !important;
+        text-align: left;
+      }
+      
+      button {
+        width: 100%;
+        padding: 14px;
+        font-size: 15px;
+      }
+      
+      .notes-area {
+        min-height: 120px;
+      }
+      
+      .item-list {
+        gap: 10px;
+      }
+      
+      .item {
+        padding: 12px;
+      }
+      
+      h1 {
+        font-size: 24px;
+      }
+      
+      h2 {
+        font-size: 20px;
+      }
+      
+      .brand a {
+        font-size: 20px;
+      }
+      
+      /* Dashboard responsive */
+      #dashboard {
+        grid-template-columns: 1fr;
+        gap: 15px;
+      }
+      
+      .stat-card {
+        padding: 15px;
+      }
+      
+      /* Timeline charts responsive - Carosello */
+      #timelineCharts {
+        display: block !important;
+        grid-template-columns: unset !important;
+      }
+      
+      .carousel-container {
+        display: block;
+      }
+      
+      canvas {
+        max-width: 100%;
+        height: auto !important;
+      }
+      
+      /* Pulsanti import affiancati */
+      .panel > div[style*="flex"] {
+        flex-direction: column;
+      }
+      
+      .panel > div[style*="flex"] > * {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<!-- HOME SCREEN -->
+<div id="homeScreen" class="container">
+  <div class="brand">
+    <a href="./index.html" style="color: #ba975c; text-decoration: none;">⬅️ Menu</a>
+    <a href="https://www.fullylife.solutions" target="_blank">FULLYLIFE SOLUTIONS</a>
+  </div>
+  <h1>PAG Consulente</h1>
+  <p class="subtitle">Gestione profili di appartenenza al gruppo</p>
+  
+  <div class="panel">
+    <div class="field">
+      <label><strong>Nominativo Consulente:</strong></label>
+      <input id="coachName" type="text" placeholder="Inserisci il tuo nome" onchange="saveCoachInfo()">
+    </div>
+  </div>
+  
+  <div class="panel">
+    <h2>Dashboard</h2>
+    <div class="stats-grid">
+      <div class="stats-column">
+        <h3>🏢 Aziende</h3>
+        <div class="stat-card">
+          <div class="stat-number" id="statAziende">0</div>
+          <div class="stat-label">Aziende</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="statPersoneAziende">0</div>
+          <div class="stat-label">Persone totali</div>
+        </div>
+      </div>
+      <div class="stats-column">
+        <h3>🔗 Gruppi Interaziendali</h3>
+        <div class="stat-card">
+          <div class="stat-number" id="statGruppi">0</div>
+          <div class="stat-label">Gruppi</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="statPersoneGruppi">0</div>
+          <div class="stat-label">Persone totali</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="panel">
+    <h2>Note Generali</h2>
+    <textarea id="generalNotes" class="notes-area" placeholder="Scrivi qui le tue note generali..." onchange="saveCoachInfo()"></textarea>
+  </div>
+  
+  <div class="panel">
+    <h2>Prossimi Appuntamenti</h2>
+    <div class="appointment-input">
+      <input id="newAppName" type="text" placeholder="Nome persona">
+      <input id="newAppDate" type="date">
+      <input id="newAppTime" type="time">
+      <button onclick="addAppointment()">➕</button>
+    </div>
+    <div id="appointmentsList"></div>
+  </div>
+  
+  <div class="panel">
+    <h2 style="text-align: center; margin-bottom: 20px;">Seleziona una categoria</h2>
+    <div class="category-buttons">
+      <button class="category-btn" onclick="selectMainCategory('aziende')">🏢 Aziende</button>
+      <button class="category-btn" onclick="selectMainCategory('gruppi')">🔗 Gruppi Interaziendali</button>
+    </div>
+  </div>
+</div>
+
+<!-- AZIENDE LIST -->
+<div id="aziendeScreen" class="container hidden">
+  <div class="brand">
+    <a href="https://www.fullylife.solutions" target="_blank">FULLYLIFE SOLUTIONS</a>
+  </div>
+  <button class="secondary" onclick="backToHome()">← Torna alla home</button>
+  
+  <h1>🏢 Aziende</h1>
+  
+  <div class="panel">
+    <h2>Le tue aziende</h2>
+    <button onclick="showNewAziendaForm()">+ Aggiungi azienda</button>
+    <div id="aziendeList" class="item-list"></div>
+  </div>
+</div>
+
+<!-- NEW AZIENDA FORM -->
+<div id="newAziendaScreen" class="container hidden">
+  <div class="brand">
+    <a href="https://www.fullylife.solutions" target="_blank">FULLYLIFE SOLUTIONS</a>
+  </div>
+  <button class="secondary" onclick="backToAziende()">← Torna alle aziende</button>
+  
+  <h1>Nuova Azienda</h1>
+  
+  <div class="panel">
+    <div class="field">
+      <label>Ragione Sociale:</label>
+      <input id="ragioneSociale" type="text" placeholder="Es: Acme S.p.A.">
+    </div>
+    <div class="field">
+      <label>P.IVA:</label>
+      <input id="piva" type="text" placeholder="Es: 12345678901">
+    </div>
+    <button onclick="saveAzienda()">💾 Salva azienda</button>
+  </div>
+</div>
+
+<!-- DIVISIONI LIST -->
+<div id="divisioniScreen" class="container hidden">
+  <div class="brand">
+    <a href="https://www.fullylife.solutions" target="_blank">FULLYLIFE SOLUTIONS</a>
+  </div>
+  <button class="secondary" onclick="backToAziende()">← Torna alle aziende</button>
+  
+  <div class="breadcrumb" id="divisioniBreadcrumb"></div>
+  
+  <h1 id="divisioniTitle"></h1>
+  
+  <div class="panel">
+    <h2>Divisioni / Reparti</h2>
+    <button onclick="showNewDivisioneForm()">+ Aggiungi divisione/reparto</button>
+    <div id="divisioniList" class="item-list"></div>
+  </div>
+</div>
+
+<!-- NEW DIVISIONE FORM -->
+<div id="newDivisioneScreen" class="container hidden">
+  <div class="brand">
+    <a href="https://www.fullylife.solutions" target="_blank">FULLYLIFE SOLUTIONS</a>
+  </div>
+  <button class="secondary" onclick="backToDivisioni()">← Torna alle divisioni</button>
+  
+  <h1>Nuova Divisione/Reparto</h1>
+  
+  <div class="panel">
+    <div class="field">
+      <label>Nome Divisione/Reparto:</label>
+      <input id="nomeDivisione" type="text" placeholder="Es: Marketing">
+    </div>
+    <button onclick="saveDivisione()">💾 Salva divisione</button>
+  </div>
+</div>
+
+<!-- PERSONE AZIENDA LIST -->
+<div id="personeAziendaScreen" class="container hidden">
+  <div class="brand">
+    <a href="https://www.fullylife.solutions" target="_blank">FULLYLIFE SOLUTIONS</a>
+  </div>
+  <button class="secondary" onclick="backToDivisioni()">← Torna alle divisioni</button>
+  
+  <div class="breadcrumb" id="personeAziendaBreadcrumb"></div>
+  
+  <h1 id="personeAziendaTitle"></h1>
+  
+  <div class="panel">
+    <h2>Persone</h2>
+    <button onclick="showNewPersonaAziendaForm()">+ Aggiungi persona</button>
+    <div id="personeAziendaList" class="item-list"></div>
+  </div>
+</div>
+
+<!-- NEW PERSONA AZIENDA FORM -->
+<div id="newPersonaAziendaScreen" class="container hidden">
+  <div class="brand">
+    <a href="https://www.fullylife.solutions" target="_blank">FULLYLIFE SOLUTIONS</a>
+  </div>
+  <button class="secondary" onclick="backToPersoneAzienda()">← Torna alle persone</button>
+  
+  <h1>Nuova Persona</h1>
+  
+  <div class="panel">
+    <div class="field">
+      <label>Nominativo:</label>
+      <input id="nominativoAzienda" type="text" placeholder="Es: Mario Rossi">
+    </div>
+    <div class="field">
+      <label>Codice Fiscale:</label>
+      <input id="codiceFiscaleAzienda" type="text" placeholder="Es: RSSMRA80A01H501Z">
+    </div>
+    <button onclick="savePersonaAzienda()">💾 Salva persona</button>
+  </div>
+</div>
+
+<!-- GRUPPI LIST -->
+<div id="gruppiScreen" class="container hidden">
+  <div class="brand">
+    <a href="https://www.fullylife.solutions" target="_blank">FULLYLIFE SOLUTIONS</a>
+  </div>
+  <button class="secondary" onclick="backToHome()">← Torna alla home</button>
+  
+  <h1>🔗 Gruppi Interaziendali</h1>
+  
+  <div class="panel">
+    <h2>I tuoi gruppi</h2>
+    <button onclick="showNewGruppoForm()">+ Aggiungi gruppo</button>
+    <div id="gruppiList" class="item-list"></div>
+  </div>
+</div>
+
+<!-- NEW GRUPPO FORM -->
+<div id="newGruppoScreen" class="container hidden">
+  <div class="brand">
+    <a href="https://www.fullylife.solutions" target="_blank">FULLYLIFE SOLUTIONS</a>
+  </div>
+  <button class="secondary" onclick="backToGruppi()">← Torna ai gruppi</button>
+  
+  <h1>Nuovo Gruppo Interaziendale</h1>
+  
+  <div class="panel">
+    <div class="field">
+      <label>Nome Gruppo:</label>
+      <input id="nomeGruppo" type="text" placeholder="Es: Associazione Imprenditori">
+    </div>
+    <button onclick="saveGruppo()">💾 Salva gruppo</button>
+  </div>
+</div>
+
+<!-- PERSONE GRUPPO LIST -->
+<div id="personeGruppoScreen" class="container hidden">
+  <div class="brand">
+    <a href="https://www.fullylife.solutions" target="_blank">FULLYLIFE SOLUTIONS</a>
+  </div>
+  <button class="secondary" onclick="backToGruppi()">← Torna ai gruppi</button>
+  
+  <div class="breadcrumb" id="personeGruppoBreadcrumb"></div>
+  
+  <h1 id="personeGruppoTitle"></h1>
+  
+  <div class="panel">
+    <h2>Persone</h2>
+    <button onclick="showNewPersonaGruppoForm()">+ Aggiungi persona</button>
+    <div id="personeGruppoList" class="item-list"></div>
+  </div>
+</div>
+
+<!-- NEW PERSONA GRUPPO FORM -->
+<div id="newPersonaGruppoScreen" class="container hidden">
+  <div class="brand">
+    <a href="https://www.fullylife.solutions" target="_blank">FULLYLIFE SOLUTIONS</a>
+  </div>
+  <button class="secondary" onclick="backToPersoneGruppo()">← Torna alle persone</button>
+  
+  <h1>Nuova Persona</h1>
+  
+  <div class="panel">
+    <div class="field">
+      <label>Nominativo:</label>
+      <input id="nominativoGruppo" type="text" placeholder="Es: Mario Rossi">
+    </div>
+    <div class="field">
+      <label>Codice Fiscale:</label>
+      <input id="codiceFiscaleGruppo" type="text" placeholder="Es: RSSMRA80A01H501Z">
+    </div>
+    <button onclick="savePersonaGruppo()">💾 Salva persona</button>
+  </div>
+</div>
+
+<!-- PROFILI SCREEN -->
+<div id="profiliScreen" class="container hidden">
+  <div class="brand">
+    <a href="https://www.fullylife.solutions" target="_blank">FULLYLIFE SOLUTIONS</a>
+  </div>
+  <button class="secondary" onclick="backFromProfili()">← Indietro</button>
+  
+  <div class="breadcrumb" id="profiliBreadcrumb"></div>
+  
+  <h1 id="profiliTitle"></h1>
+  
+  <div class="panel" id="timelinePanel" style="display: none;">
+    <h2>Evoluzione temporale (ultimi 6 profili)</h2>
+    <div style="margin-bottom: 15px;">
+      <label style="display: block; margin-bottom: 8px; font-weight: bold;">Filtra per descrizione:</label>
+      <select id="timelineFilter" style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #555; background: #3f3f3f; color: #f5f5f5;" onchange="loadTimelineCharts()">
+        <option value="">Tutti i profili</option>
+      </select>
+    </div>
+    <div id="timelineCharts" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-top: 20px;"></div>
+  </div>
+  
+  <div class="panel">
+    <h2>Tutti i profili</h2>
+    <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 15px;">
+      <label class="file-upload-btn" style="margin: 0;">
+        📁 Importa da File
+        <input type="file" id="fileInput" accept=".json" onchange="importProfile()">
+      </label>
+      <button onclick="showPasteModal()">📋 Incolla JSON</button>
+    </div>
+    <div id="profiliList" class="item-list"></div>
+  </div>
+</div>
+
+<!-- PROFILO DETAIL SCREEN -->
+<div id="profiloDetailScreen" class="container hidden">
+  <div class="brand">
+    <a href="https://www.fullylife.solutions" target="_blank">FULLYLIFE SOLUTIONS</a>
+  </div>
+  <button class="secondary" onclick="backToProfili()">← Torna ai profili</button>
+  
+  <h1 id="profiloDetailTitle"></h1>
+  <p class="subtitle" id="profiloDetailInfo"></p>
+  
+  <div class="panel">
+    <div class="chart-container">
+      <canvas id="radarChart"></canvas>
+    </div>
+  </div>
+  
+  <div class="panel" id="considerationsPanel">
+    <h2>Considerazioni dell'utente</h2>
+    <div id="profiloConsiderations" style="background: #3f3f3f; padding: 15px; border-radius: 8px; min-height: 60px; line-height: 1.6;"></div>
+  </div>
+  
+  <div class="panel">
+    <h2>Valori</h2>
+    <div id="profiloDetailValues" class="profile-values"></div>
+  </div>
+  
+  <div class="panel">
+    <button class="secondary" onclick="deleteCurrentProfile()">🗑️ Elimina profilo</button>
+  </div>
+</div>
+
+<script>
+let radarChart = null;
+let currentView = 'home';
+let currentAziendaId = null;
+let currentDivisioneId = null;
+let currentGruppoId = null;
+let currentPersonaId = null;
+let currentPersonaType = null; // 'azienda' or 'gruppo'
+let currentProfileId = null;
+
+const state = {
+  coachName: '',
+  generalNotes: '',
+  appointments: [],
+  aziende: [],
+  gruppi: []
+};
+
+function loadState() {
+  const saved = localStorage.getItem('pagCoachState');
+  if (saved) {
+    const loaded = JSON.parse(saved);
+    state.coachName = loaded.coachName || '';
+    state.generalNotes = loaded.generalNotes || '';
+    state.appointments = loaded.appointments || [];
+    state.aziende = loaded.aziende || [];
+    state.gruppi = loaded.gruppi || [];
+    
+    // Carica i dati nell'interfaccia
+    document.getElementById('coachName').value = state.coachName;
+    document.getElementById('generalNotes').value = state.generalNotes;
+  }
+  updateDashboard();
+  loadAppointmentsList();
+}
+
+function saveState() {
+  localStorage.setItem('pagCoachState', JSON.stringify(state));
+}
+
+function hideAllScreens() {
+  document.querySelectorAll('.container').forEach(el => el.classList.add('hidden'));
+}
+
+function saveCoachInfo() {
+  state.coachName = document.getElementById('coachName').value;
+  state.generalNotes = document.getElementById('generalNotes').value;
+  saveState();
+}
+
+function updateDashboard() {
+  // Conta aziende
+  document.getElementById('statAziende').textContent = state.aziende.length;
+  
+  // Conta persone nelle aziende
+  let personeAziende = 0;
+  state.aziende.forEach(az => {
+    az.divisioni.forEach(div => {
+      personeAziende += div.persone.length;
+    });
+  });
+  document.getElementById('statPersoneAziende').textContent = personeAziende;
+  
+  // Conta gruppi
+  document.getElementById('statGruppi').textContent = state.gruppi.length;
+  
+  // Conta persone nei gruppi
+  let personeGruppi = 0;
+  state.gruppi.forEach(gruppo => {
+    personeGruppi += gruppo.persone.length;
+  });
+  document.getElementById('statPersoneGruppi').textContent = personeGruppi;
+}
+
+function addAppointment() {
+  const name = document.getElementById('newAppName').value;
+  const date = document.getElementById('newAppDate').value;
+  const time = document.getElementById('newAppTime').value;
+  
+  if (!name || !date || !time) {
+    alert('Compila tutti i campi dell\'appuntamento');
+    return;
+  }
+  
+  state.appointments.push({ name, date, time });
+  state.appointments.sort((a, b) => {
+    const dateA = new Date(a.date + ' ' + a.time);
+    const dateB = new Date(b.date + ' ' + b.time);
+    return dateA - dateB;
+  });
+  
+  saveState();
+  loadAppointmentsList();
+  
+  // Reset form
+  document.getElementById('newAppName').value = '';
+  document.getElementById('newAppDate').value = '';
+  document.getElementById('newAppTime').value = '';
+}
+
+function loadAppointmentsList() {
+  const list = document.getElementById('appointmentsList');
+  
+  if (state.appointments.length === 0) {
+    list.innerHTML = '<p style="opacity: 0.6; text-align: center; margin-top: 10px;">Nessun appuntamento</p>';
+    return;
+  }
+  
+  list.innerHTML = state.appointments.map((app, index) => `
+    <div class="appointment-item">
+      <div>
+        <strong>${app.name}</strong><br>
+        <small>${formatDate(app.date)} • ${app.time}</small>
+      </div>
+      <button class="secondary" onclick="deleteAppointment(${index})">🗑️</button>
+    </div>
+  `).join('');
+}
+
+function deleteAppointment(index) {
+  if (confirm('Eliminare questo appuntamento?')) {
+    state.appointments.splice(index, 1);
+    saveState();
+    loadAppointmentsList();
+  }
+}
+
+function selectMainCategory(category) {
+  hideAllScreens();
+  if (category === 'aziende') {
+    document.getElementById('aziendeScreen').classList.remove('hidden');
+    loadAziendeList();
+  } else {
+    document.getElementById('gruppiScreen').classList.remove('hidden');
+    loadGruppiList();
+  }
+}
+
+function backToHome() {
+  hideAllScreens();
+  document.getElementById('homeScreen').classList.remove('hidden');
+  updateDashboard();
+  loadAppointmentsList();
+}
+
+// ===== AZIENDE =====
+
+function loadAziendeList() {
+  const list = document.getElementById('aziendeList');
+  if (state.aziende.length === 0) {
+    list.innerHTML = '<p style="opacity: 0.6; text-align: center; margin-top: 20px;">Nessuna azienda</p>';
+    return;
+  }
+  
+  list.innerHTML = state.aziende.map((azienda, index) => `
+    <div class="item" onclick="selectAzienda(${index})">
+      <div class="item-info">
+        <strong>${azienda.ragioneSociale}</strong>
+        <small>P.IVA: ${azienda.piva}</small>
+      </div>
+      <div class="item-actions">
+        <button class="secondary" onclick="event.stopPropagation(); deleteAzienda(${index})">🗑️</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function showNewAziendaForm() {
+  hideAllScreens();
+  document.getElementById('newAziendaScreen').classList.remove('hidden');
+  document.getElementById('ragioneSociale').value = '';
+  document.getElementById('piva').value = '';
+}
+
+function saveAzienda() {
+  const ragioneSociale = document.getElementById('ragioneSociale').value;
+  const piva = document.getElementById('piva').value;
+  
+  if (!ragioneSociale || !piva) {
+    alert('Compila tutti i campi');
+    return;
+  }
+  
+  state.aziende.push({
+    ragioneSociale,
+    piva,
+    divisioni: []
+  });
+  
+  saveState();
+  updateDashboard();
+  alert('Azienda salvata!');
+  backToAziende();
+}
+
+function backToAziende() {
+  hideAllScreens();
+  document.getElementById('aziendeScreen').classList.remove('hidden');
+  loadAziendeList();
+}
+
+function deleteAzienda(index) {
+  if (confirm('Eliminare questa azienda e tutti i suoi dati?')) {
+    state.aziende.splice(index, 1);
+    saveState();
+    updateDashboard();
+    loadAziendeList();
+  }
+}
+
+function selectAzienda(index) {
+  currentAziendaId = index;
+  hideAllScreens();
+  document.getElementById('divisioniScreen').classList.remove('hidden');
+  
+  const azienda = state.aziende[index];
+  document.getElementById('divisioniTitle').textContent = azienda.ragioneSociale;
+  document.getElementById('divisioniBreadcrumb').innerHTML = `🏢 ${azienda.ragioneSociale}`;
+  
+  loadDivisioniList();
+}
+
+// ===== DIVISIONI =====
+
+function loadDivisioniList() {
+  const list = document.getElementById('divisioniList');
+  const divisioni = state.aziende[currentAziendaId].divisioni;
+  
+  if (divisioni.length === 0) {
+    list.innerHTML = '<p style="opacity: 0.6; text-align: center; margin-top: 20px;">Nessuna divisione</p>';
+    return;
+  }
+  
+  list.innerHTML = divisioni.map((divisione, index) => `
+    <div class="item" onclick="selectDivisione(${index})">
+      <div class="item-info">
+        <strong>${divisione.nome}</strong>
+        <small>${divisione.persone.length} persone</small>
+      </div>
+      <div class="item-actions">
+        <button class="secondary" onclick="event.stopPropagation(); deleteDivisione(${index})">🗑️</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function showNewDivisioneForm() {
+  hideAllScreens();
+  document.getElementById('newDivisioneScreen').classList.remove('hidden');
+  document.getElementById('nomeDivisione').value = '';
+}
+
+function saveDivisione() {
+  const nome = document.getElementById('nomeDivisione').value;
+  
+  if (!nome) {
+    alert('Inserisci il nome della divisione');
+    return;
+  }
+  
+  state.aziende[currentAziendaId].divisioni.push({
+    nome,
+    persone: []
+  });
+  
+  saveState();
+  updateDashboard();
+  alert('Divisione salvata!');
+  backToDivisioni();
+}
+
+function backToDivisioni() {
+  hideAllScreens();
+  document.getElementById('divisioniScreen').classList.remove('hidden');
+  loadDivisioniList();
+}
+
+function deleteDivisione(index) {
+  if (confirm('Eliminare questa divisione e tutti i suoi dati?')) {
+    state.aziende[currentAziendaId].divisioni.splice(index, 1);
+    saveState();
+    updateDashboard();
+    loadDivisioniList();
+  }
+}
+
+function selectDivisione(index) {
+  currentDivisioneId = index;
+  hideAllScreens();
+  document.getElementById('personeAziendaScreen').classList.remove('hidden');
+  
+  const azienda = state.aziende[currentAziendaId];
+  const divisione = azienda.divisioni[index];
+  
+  document.getElementById('personeAziendaTitle').textContent = divisione.nome;
+  document.getElementById('personeAziendaBreadcrumb').innerHTML = 
+    `🏢 ${azienda.ragioneSociale} <span>→</span> 📂 ${divisione.nome}`;
+  
+  loadPersoneAziendaList();
+}
+
+// ===== PERSONE AZIENDA =====
+
+function loadPersoneAziendaList() {
+  const list = document.getElementById('personeAziendaList');
+  const persone = state.aziende[currentAziendaId].divisioni[currentDivisioneId].persone;
+  
+  if (persone.length === 0) {
+    list.innerHTML = '<p style="opacity: 0.6; text-align: center; margin-top: 20px;">Nessuna persona</p>';
+    return;
+  }
+  
+  list.innerHTML = persone.map((persona, index) => `
+    <div class="item" onclick="selectPersonaAzienda(${index})">
+      <div class="item-info">
+        <strong>${persona.nominativo}</strong>
+        <small>CF: ${persona.codiceFiscale} • ${persona.profili.length} profili</small>
+      </div>
+      <div class="item-actions">
+        <button class="secondary" onclick="event.stopPropagation(); deletePersonaAzienda(${index})">🗑️</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function showNewPersonaAziendaForm() {
+  hideAllScreens();
+  document.getElementById('newPersonaAziendaScreen').classList.remove('hidden');
+  document.getElementById('nominativoAzienda').value = '';
+  document.getElementById('codiceFiscaleAzienda').value = '';
+}
+
+function savePersonaAzienda() {
+  const nominativo = document.getElementById('nominativoAzienda').value;
+  const codiceFiscale = document.getElementById('codiceFiscaleAzienda').value;
+  
+  if (!nominativo || !codiceFiscale) {
+    alert('Compila tutti i campi');
+    return;
+  }
+  
+  state.aziende[currentAziendaId].divisioni[currentDivisioneId].persone.push({
+    nominativo,
+    codiceFiscale,
+    profili: []
+  });
+  
+  saveState();
+  updateDashboard();
+  alert('Persona salvata!');
+  backToPersoneAzienda();
+}
+
+function backToPersoneAzienda() {
+  hideAllScreens();
+  document.getElementById('personeAziendaScreen').classList.remove('hidden');
+  loadPersoneAziendaList();
+}
+
+function deletePersonaAzienda(index) {
+  if (confirm('Eliminare questa persona e tutti i suoi profili?')) {
+    state.aziende[currentAziendaId].divisioni[currentDivisioneId].persone.splice(index, 1);
+    saveState();
+    updateDashboard();
+    loadPersoneAziendaList();
+  }
+}
+
+function selectPersonaAzienda(index) {
+  currentPersonaId = index;
+  currentPersonaType = 'azienda';
+  showProfiliScreen();
+}
+
+// ===== GRUPPI =====
+
+function loadGruppiList() {
+  const list = document.getElementById('gruppiList');
+  
+  if (state.gruppi.length === 0) {
+    list.innerHTML = '<p style="opacity: 0.6; text-align: center; margin-top: 20px;">Nessun gruppo</p>';
+    return;
+  }
+  
+  list.innerHTML = state.gruppi.map((gruppo, index) => `
+    <div class="item" onclick="selectGruppo(${index})">
+      <div class="item-info">
+        <strong>${gruppo.nome}</strong>
+        <small>${gruppo.persone.length} persone</small>
+      </div>
+      <div class="item-actions">
+        <button class="secondary" onclick="event.stopPropagation(); deleteGruppo(${index})">🗑️</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function showNewGruppoForm() {
+  hideAllScreens();
+  document.getElementById('newGruppoScreen').classList.remove('hidden');
+  document.getElementById('nomeGruppo').value = '';
+}
+
+function saveGruppo() {
+  const nome = document.getElementById('nomeGruppo').value;
+  
+  if (!nome) {
+    alert('Inserisci il nome del gruppo');
+    return;
+  }
+  
+  state.gruppi.push({
+    nome,
+    persone: []
+  });
+  
+  saveState();
+  updateDashboard();
+  alert('Gruppo salvato!');
+  backToGruppi();
+}
+
+function backToGruppi() {
+  hideAllScreens();
+  document.getElementById('gruppiScreen').classList.remove('hidden');
+  loadGruppiList();
+}
+
+function deleteGruppo(index) {
+  if (confirm('Eliminare questo gruppo e tutti i suoi dati?')) {
+    state.gruppi.splice(index, 1);
+    saveState();
+    updateDashboard();
+    loadGruppiList();
+  }
+}
+
+function selectGruppo(index) {
+  currentGruppoId = index;
+  hideAllScreens();
+  document.getElementById('personeGruppoScreen').classList.remove('hidden');
+  
+  const gruppo = state.gruppi[index];
+  
+  document.getElementById('personeGruppoTitle').textContent = gruppo.nome;
+  document.getElementById('personeGruppoBreadcrumb').innerHTML = 
+    `🔗 ${gruppo.nome}`;
+  
+  loadPersoneGruppoList();
+}
+
+// ===== PERSONE GRUPPO =====
+
+function loadPersoneGruppoList() {
+  const list = document.getElementById('personeGruppoList');
+  const persone = state.gruppi[currentGruppoId].persone;
+  
+  if (persone.length === 0) {
+    list.innerHTML = '<p style="opacity: 0.6; text-align: center; margin-top: 20px;">Nessuna persona</p>';
+    return;
+  }
+  
+  list.innerHTML = persone.map((persona, index) => `
+    <div class="item" onclick="selectPersonaGruppo(${index})">
+      <div class="item-info">
+        <strong>${persona.nominativo}</strong>
+        <small>CF: ${persona.codiceFiscale} • ${persona.profili.length} profili</small>
+      </div>
+      <div class="item-actions">
+        <button class="secondary" onclick="event.stopPropagation(); deletePersonaGruppo(${index})">🗑️</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function showNewPersonaGruppoForm() {
+  hideAllScreens();
+  document.getElementById('newPersonaGruppoScreen').classList.remove('hidden');
+  document.getElementById('nominativoGruppo').value = '';
+  document.getElementById('codiceFiscaleGruppo').value = '';
+}
+
+function savePersonaGruppo() {
+  const nominativo = document.getElementById('nominativoGruppo').value;
+  const codiceFiscale = document.getElementById('codiceFiscaleGruppo').value;
+  
+  if (!nominativo || !codiceFiscale) {
+    alert('Compila tutti i campi');
+    return;
+  }
+  
+  state.gruppi[currentGruppoId].persone.push({
+    nominativo,
+    codiceFiscale,
+    profili: []
+  });
+  
+  saveState();
+  updateDashboard();
+  alert('Persona salvata!');
+  backToPersoneGruppo();
+}
+
+function backToPersoneGruppo() {
+  hideAllScreens();
+  document.getElementById('personeGruppoScreen').classList.remove('hidden');
+  loadPersoneGruppoList();
+}
+
+function deletePersonaGruppo(index) {
+  if (confirm('Eliminare questa persona e tutti i suoi profili?')) {
+    state.gruppi[currentGruppoId].persone.splice(index, 1);
+    saveState();
+    updateDashboard();
+    loadPersoneGruppoList();
+  }
+}
+
+function selectPersonaGruppo(index) {
+  currentPersonaId = index;
+  currentPersonaType = 'gruppo';
+  showProfiliScreen();
+}
+
+// ===== PROFILI =====
+
+function formatSPP(spp) {
+  if (!spp) return '';
+  
+  const map = {
+    sessualita: { maschio: 'M', femmina: 'F' },
+    lateralita: { destrimane: 'DX', mancino: 'SX' },
+    bisogni: { protezione: 'P', identificazione: 'I', spazialita: 'S' },
+    foglietto: { boccone: 'B', attacco: 'A', gratificazione: 'G', socialita: 'S' },
+    intensita: { attivazione: 'A', inibizione: 'I' }
+  };
+  
+  const sigle = [];
+  if (spp.sessualita) sigle.push(map.sessualita[spp.sessualita] || '');
+  if (spp.lateralita) sigle.push(map.lateralita[spp.lateralita] || '');
+  if (spp.bisogni) sigle.push(map.bisogni[spp.bisogni] || '');
+  if (spp.foglietto) sigle.push(map.foglietto[spp.foglietto] || '');
+  if (spp.intensita) sigle.push(map.intensita[spp.intensita] || '');
+  
+  return sigle.filter(s => s).join(', ');
+}
+
+function getCurrentPersona() {
+  if (currentPersonaType === 'azienda') {
+    return state.aziende[currentAziendaId].divisioni[currentDivisioneId].persone[currentPersonaId];
+  } else {
+    return state.gruppi[currentGruppoId].persone[currentPersonaId];
+  }
+}
+
+function showProfiliScreen() {
+  hideAllScreens();
+  document.getElementById('profiliScreen').classList.remove('hidden');
+  
+  const persona = getCurrentPersona();
+  document.getElementById('profiliTitle').textContent = persona.nominativo;
+  
+  if (currentPersonaType === 'azienda') {
+    const azienda = state.aziende[currentAziendaId];
+    const divisione = azienda.divisioni[currentDivisioneId];
+    document.getElementById('profiliBreadcrumb').innerHTML = 
+      `🏢 ${azienda.ragioneSociale} <span>→</span> 📂 ${divisione.nome} <span>→</span> 👤 ${persona.nominativo}`;
+  } else {
+    const gruppo = state.gruppi[currentGruppoId];
+    document.getElementById('profiliBreadcrumb').innerHTML = `🔗 ${gruppo.nome} <span>→</span> 👤 ${persona.nominativo}`;
+  }
+  
+  loadProfiliList();
+  loadTimelineCharts();
+}
+
+function loadTimelineCharts() {
+  const persona = getCurrentPersona();
+  const timelinePanel = document.getElementById('timelinePanel');
+  const timelineCharts = document.getElementById('timelineCharts');
+  const timelineFilter = document.getElementById('timelineFilter');
+  
+  if (persona.profili.length === 0) {
+    timelinePanel.style.display = 'none';
+    return;
+  }
+  
+  timelinePanel.style.display = 'block';
+  
+  // Popola il filtro con le descrizioni uniche
+  const uniqueDescriptions = [...new Set(persona.profili.map(p => p.descrizione))];
+  const currentFilter = timelineFilter.value;
+  
+  timelineFilter.innerHTML = '<option value="">Tutti i profili</option>';
+  uniqueDescriptions.forEach(desc => {
+    const option = document.createElement('option');
+    option.value = desc;
+    option.textContent = desc;
+    if (desc === currentFilter) option.selected = true;
+    timelineFilter.appendChild(option);
+  });
+  
+  // Filtra i profili per descrizione se selezionata
+  let filteredProfili = persona.profili;
+  if (currentFilter) {
+    filteredProfili = persona.profili.filter(p => p.descrizione === currentFilter);
+  }
+  
+  // Ordina per data e prendi ultimi 6
+  const sortedProfili = [...filteredProfili].sort((a, b) => 
+    new Date(b.data) - new Date(a.data)
+  ).slice(0, 6);
+  
+  if (sortedProfili.length === 0) {
+    timelineCharts.innerHTML = '<p style="text-align: center; opacity: 0.6; margin: 20px;">Nessun profilo per questa descrizione</p>';
+    return;
+  }
+  
+  const profilesToShow = sortedProfili.reverse();
+  
+  // Rileva se è mobile
+  const isMobile = window.innerWidth <= 768;
+  
+  if (isMobile) {
+    // CAROSELLO MOBILE
+    timelineCharts.innerHTML = `
+      <div class="carousel-container">
+        <div class="carousel-track" id="carouselTrack"></div>
+      </div>
+      <div class="carousel-nav">
+        <button class="carousel-btn" id="prevBtn" onclick="moveCarousel(-1)">‹</button>
+        <div class="carousel-indicator">
+          <span id="currentSlide">1</span> / <span id="totalSlides">${profilesToShow.length}</span>
+        </div>
+        <button class="carousel-btn" id="nextBtn" onclick="moveCarousel(1)">›</button>
+      </div>
+    `;
+    
+    const track = document.getElementById('carouselTrack');
+    
+    profilesToShow.forEach((profilo, index) => {
+      const chartId = `miniChart${index}`;
+      const item = document.createElement('div');
+      item.className = 'carousel-item';
+      item.innerHTML = `
+        <div class="mini-chart-container">
+          <canvas id="${chartId}"></canvas>
+          <div class="mini-chart-date">${formatDate(profilo.data)}</div>
+          <div class="mini-chart-desc">${profilo.descrizione}</div>
+        </div>
+      `;
+      track.appendChild(item);
+      
+      setTimeout(() => createMiniChartConsultant(chartId, profilo.valori), 50);
+    });
+    
+    // Inizializza carosello
+    window.currentCarouselIndex = 0;
+    updateCarouselButtons();
+    
+  } else {
+    // GRIGLIA DESKTOP
+    timelineCharts.innerHTML = '';
+    
+    profilesToShow.forEach((profilo, index) => {
+      const chartId = `miniChart${index}`;
+      const container = document.createElement('div');
+      container.className = 'mini-chart-container';
+      container.innerHTML = `
+        <canvas id="${chartId}"></canvas>
+        <div class="mini-chart-date">${formatDate(profilo.data)}</div>
+        <div class="mini-chart-desc">${profilo.descrizione}</div>
+      `;
+      timelineCharts.appendChild(container);
+      
+      setTimeout(() => createMiniChartConsultant(chartId, profilo.valori), 50);
+    });
+  }
+}
+
+function createMiniChartConsultant(chartId, valori) {
+  const ctx = document.getElementById(chartId);
+  if (ctx) {
+    new Chart(ctx, {
+      type: 'radar',
+      data: {
+        labels: ['Priorità','Intensità','Riconosc.','Richieste','Contributi','Soddisfaz.'],
+        datasets: [{
+          data: [
+            valori.priorita,
+            valori.intensita,
+            valori.riconoscimento,
+            valori.richieste,
+            valori.contributi,
+            valori.soddisfazione
+          ],
+          fill: true,
+          backgroundColor: 'rgba(245,166,35,0.4)',
+          borderColor: 'rgba(245,166,35,1)',
+          borderWidth: 2,
+          pointBackgroundColor: 'rgba(245,166,35,1)',
+          pointBorderColor: '#fff',
+          pointBorderWidth: 2,
+          pointRadius: 4,
+          pointHoverRadius: 6
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: { 
+          r: { 
+            min: 0, 
+            max: 100,
+            ticks: { 
+              display: true,
+              stepSize: 50,
+              color: '#f5f5f5',
+              backdropColor: 'transparent',
+              font: { size: 10 }
+            },
+            grid: {
+              color: 'rgba(255, 255, 255, 0.2)',
+              lineWidth: 1.5
+            },
+            angleLines: {
+              color: 'rgba(255, 255, 255, 0.2)',
+              lineWidth: 1.5
+            },
+            pointLabels: { 
+              font: { 
+                size: 11,
+                weight: 'bold'
+              },
+              color: '#f5a623'
+            }
+          } 
+        },
+        plugins: { 
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: 'rgba(47, 47, 47, 0.9)',
+            titleColor: '#f5a623',
+            bodyColor: '#f5f5f5',
+            borderColor: '#f5a623',
+            borderWidth: 1,
+            padding: 8,
+            displayColors: false
+          }
+        }
+      }
+    });
+  }
+}
+
+// Funzioni carosello
+function moveCarousel(direction) {
+  const track = document.getElementById('carouselTrack');
+  const totalSlides = track.children.length;
+  
+  window.currentCarouselIndex = (window.currentCarouselIndex || 0) + direction;
+  
+  if (window.currentCarouselIndex < 0) {
+    window.currentCarouselIndex = 0;
+  } else if (window.currentCarouselIndex >= totalSlides) {
+    window.currentCarouselIndex = totalSlides - 1;
+  }
+  
+  track.style.transform = `translateX(-${window.currentCarouselIndex * 100}%)`;
+  updateCarouselButtons();
+}
+
+function updateCarouselButtons() {
+  const track = document.getElementById('carouselTrack');
+  const prevBtn = document.getElementById('prevBtn');
+  const nextBtn = document.getElementById('nextBtn');
+  const currentSlide = document.getElementById('currentSlide');
+  
+  if (!track) return;
+  
+  const totalSlides = track.children.length;
+  const index = window.currentCarouselIndex || 0;
+  
+  if (prevBtn) prevBtn.disabled = index === 0;
+  if (nextBtn) nextBtn.disabled = index === totalSlides - 1;
+  if (currentSlide) currentSlide.textContent = index + 1;
+}
+
+function loadProfiliList() {
+  const list = document.getElementById('profiliList');
+  const persona = getCurrentPersona();
+  
+  if (persona.profili.length === 0) {
+    list.innerHTML = '<p style="opacity: 0.6; text-align: center; margin-top: 20px;">Nessun profilo importato</p>';
+    return;
+  }
+  
+  list.innerHTML = persona.profili.map((profilo, index) => {
+    const sppText = formatSPP(profilo.spp);
+    return `
+    <div class="profile-card">
+      <div class="profile-card-header">
+        <div>
+          <strong>${profilo.descrizione}</strong><br>
+          ${sppText ? `<span style="color: #f5a623; font-size: 13px; font-weight: bold;">SPP: ${sppText}</span><br>` : ''}
+          <small>${formatDate(profilo.data)} • ${profilo.categoria}</small>
+        </div>
+        <div>
+          <button onclick="viewProfiloDetail(${index})">👁️ Visualizza</button>
+          <button class="secondary" onclick="deleteProfilo(${index})">🗑️</button>
+        </div>
+      </div>
+    </div>
+  `}).join('');
+}
+
+function showPasteModal() {
+  // Crea modal per incollare JSON
+  const modal = document.createElement('div');
+  modal.style.cssText = `
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    padding: 20px;
+  `;
+  
+  const content = document.createElement('div');
+  content.style.cssText = `
+    background: #2f2f2f;
+    padding: 20px;
+    border-radius: 12px;
+    max-width: 500px;
+    width: 100%;
+    max-height: 80vh;
+    display: flex;
+    flex-direction: column;
+  `;
+  
+  content.innerHTML = `
+    <h2 style="color: #ba975c; margin-bottom: 15px; text-align: center;">📋 Incolla JSON Profilo</h2>
+    <p style="text-align: center; margin-bottom: 15px; opacity: 0.8; font-size: 14px;">
+      Incolla qui il JSON ricevuto dall'utente
+    </p>
+    <textarea placeholder="Incolla qui il JSON..." style="
+      width: 100%;
+      height: 300px;
+      padding: 15px;
+      background: #1a1a1a;
+      color: #f5f5f5;
+      border: 2px solid #555;
+      border-radius: 8px;
+      font-family: monospace;
+      font-size: 12px;
+      resize: none;
+      margin-bottom: 15px;
+    " id="pasteTextArea"></textarea>
+    <div style="display: flex; gap: 10px;">
+      <button onclick="importFromPaste()" style="
+        flex: 1;
+        padding: 12px;
+        background: #ba975c;
+        color: #000;
+        border: none;
+        border-radius: 8px;
+        font-weight: bold;
+        cursor: pointer;
+      ">✓ Importa</button>
+      <button onclick="this.closest('[style*=fixed]').remove()" style="
+        flex: 1;
+        padding: 12px;
+        background: #555;
+        color: #f5f5f5;
+        border: none;
+        border-radius: 8px;
+        font-weight: bold;
+        cursor: pointer;
+      ">✕ Annulla</button>
+    </div>
+  `;
+  
+  modal.appendChild(content);
+  document.body.appendChild(modal);
+  
+  // Focus sulla textarea
+  setTimeout(() => {
+    document.getElementById('pasteTextArea').focus();
+  }, 100);
+  
+  // Chiudi cliccando fuori
+  modal.onclick = (e) => {
+    if (e.target === modal) {
+      modal.remove();
+    }
+  };
+}
+
+function importFromPaste() {
+  const textarea = document.getElementById('pasteTextArea');
+  const jsonText = textarea.value.trim();
+  
+  if (!jsonText) {
+    alert('Nessun testo incollato!');
+    return;
+  }
+  
+  try {
+    const data = JSON.parse(jsonText);
+    
+    // Valida che il JSON abbia i campi necessari
+    if (!data.descrizione || !data.data || !data.valori) {
+      alert('JSON non valido: mancano campi obbligatori');
+      return;
+    }
+    
+    const persona = getCurrentPersona();
+    persona.profili.push({
+      descrizione: data.descrizione,
+      data: data.data,
+      categoria: data.categoria,
+      considerazioni: data.considerazioni || '',
+      valori: data.valori,
+      spp: data.spp || null
+    });
+    
+    saveState();
+    updateDashboard();
+    loadProfiliList();
+    loadTimelineCharts();
+    
+    // Chiudi modal
+    document.querySelector('[style*=fixed]').remove();
+    
+    alert(`✅ Profilo importato con successo!\n\nUtente: ${data.utente || 'N/A'}\nCategoria: ${data.categoria}\nDescrizione: ${data.descrizione}`);
+    
+  } catch (err) {
+    console.error('Errore parsing JSON:', err);
+    alert('❌ Errore: il testo incollato non è un JSON valido.\n\nAssicurati di aver copiato tutto il testo correttamente.');
+  }
+}
+
+function importProfile() {
+  const file = document.getElementById('fileInput').files[0];
+  if (!file) return;
+  
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const data = JSON.parse(e.target.result);
+      
+      const persona = getCurrentPersona();
+      persona.profili.push({
+        descrizione: data.descrizione,
+        data: data.data,
+        categoria: data.categoria,
+        considerazioni: data.considerazioni || '',
+        valori: data.valori,
+        spp: data.spp || null
+      });
+      
+      saveState();
+      updateDashboard();
+      loadProfiliList();
+      loadTimelineCharts();
+      document.getElementById('fileInput').value = '';
+      alert('Profilo importato con successo!');
+    } catch (err) {
+      alert('Errore nel file JSON');
+    }
+  };
+  reader.readAsText(file);
+}
+
+function backFromProfili() {
+  if (currentPersonaType === 'azienda') {
+    backToPersoneAzienda();
+  } else {
+    backToPersoneGruppo();
+  }
+}
+
+function deleteProfilo(index) {
+  if (confirm('Eliminare questo profilo?')) {
+    const persona = getCurrentPersona();
+    persona.profili.splice(index, 1);
+    saveState();
+    updateDashboard();
+    loadProfiliList();
+    loadTimelineCharts();
+  }
+}
+
+function viewProfiloDetail(index) {
+  currentProfileId = index;
+  hideAllScreens();
+  document.getElementById('profiloDetailScreen').classList.remove('hidden');
+  
+  const persona = getCurrentPersona();
+  const profilo = persona.profili[index];
+  
+  const sppText = formatSPP(profilo.spp);
+  
+  document.getElementById('profiloDetailTitle').textContent = profilo.descrizione;
+  document.getElementById('profiloDetailInfo').textContent = 
+    `${sppText ? 'SPP: ' + sppText + ' • ' : ''}${formatDate(profilo.data)} • ${profilo.categoria}`;
+  
+  // Considerazioni
+  const considerationsPanel = document.getElementById('considerationsPanel');
+  const considerationsDiv = document.getElementById('profiloConsiderations');
+  if (profilo.considerazioni && profilo.considerazioni.trim() !== '') {
+    considerationsDiv.textContent = profilo.considerazioni;
+    considerationsPanel.style.display = 'block';
+  } else {
+    considerationsDiv.textContent = 'Nessuna considerazione inserita dall\'utente.';
+    considerationsPanel.style.display = 'block';
+  }
+  
+  // Valori
+  const valuesHtml = `
+    <div class="profile-value"><span>Priorità:</span><strong>${profilo.valori.priorita}</strong></div>
+    <div class="profile-value"><span>Intensità:</span><strong>${profilo.valori.intensita}</strong></div>
+    <div class="profile-value"><span>Riconoscimento:</span><strong>${profilo.valori.riconoscimento}</strong></div>
+    <div class="profile-value"><span>Richieste:</span><strong>${profilo.valori.richieste}</strong></div>
+    <div class="profile-value"><span>Contributi:</span><strong>${profilo.valori.contributi}</strong></div>
+    <div class="profile-value"><span>Soddisfazione:</span><strong>${profilo.valori.soddisfazione}</strong></div>
+  `;
+  document.getElementById('profiloDetailValues').innerHTML = valuesHtml;
+  
+  // Chart
+  initChart();
+  updateChartWithProfile(profilo);
+}
+
+function initChart() {
+  if (radarChart) {
+    radarChart.destroy();
+  }
+  
+  const ctx = document.getElementById('radarChart');
+  radarChart = new Chart(ctx, {
+    type: 'radar',
+    data: {
+      labels: ['Priorità','Intensità','Riconosc.','Richieste','Contributi','Soddisfaz.'],
+      datasets: [{
+        data: [50,50,50,50,50,50],
+        fill: true,
+        backgroundColor: 'rgba(245,166,35,0.4)',
+        borderColor: 'rgba(245,166,35,1)',
+        borderWidth: 3,
+        pointBackgroundColor: 'rgba(245,166,35,1)',
+        pointBorderColor: '#fff',
+        pointBorderWidth: 2,
+        pointRadius: 5,
+        pointHoverRadius: 7
+      }]
+    },
+    options: {
+      scales: { 
+        r: { 
+          min: 0, 
+          max: 100,
+          ticks: { 
+            display: true,
+            stepSize: 20,
+            color: '#f5f5f5',
+            backdropColor: 'transparent',
+            font: { size: 12 }
+          },
+          grid: {
+            color: 'rgba(255, 255, 255, 0.2)',
+            lineWidth: 2
+          },
+          angleLines: {
+            color: 'rgba(255, 255, 255, 0.2)',
+            lineWidth: 2
+          },
+          pointLabels: {
+            font: { 
+              size: 14,
+              weight: 'bold'
+            },
+            color: '#f5a623'
+          }
+        } 
+      },
+      plugins: { 
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: 'rgba(47, 47, 47, 0.9)',
+          titleColor: '#f5a623',
+          bodyColor: '#f5f5f5',
+          borderColor: '#f5a623',
+          borderWidth: 1,
+          padding: 12,
+          displayColors: false
+        }
+      }
+    }
+  });
+}
+
+function updateChartWithProfile(profilo) {
+  const values = [
+    profilo.valori.priorita,
+    profilo.valori.intensita,
+    profilo.valori.riconoscimento,
+    profilo.valori.richieste,
+    profilo.valori.contributi,
+    profilo.valori.soddisfazione
+  ];
+  
+  radarChart.data.datasets[0].data = values;
+  radarChart.update();
+}
+
+function backToProfili() {
+  showProfiliScreen();
+}
+
+function deleteCurrentProfile() {
+  if (confirm('Eliminare questo profilo?')) {
+    const persona = getCurrentPersona();
+    persona.profili.splice(currentProfileId, 1);
+    saveState();
+    updateDashboard();
+    backToProfili();
+  }
+}
+
+function formatDate(dateString) {
+  const [year, month, day] = dateString.split('-');
+  return `${day}-${month}-${year}`;
+}
+
+loadState();
+</script>
+
+<!-- Service Worker Registration -->
+<script>
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./sw.js")
+      .then(reg => console.log("✅ SW registered"))
+      .catch(err => console.log("❌ SW registration failed:", err));
+  });
+}
+</script>
+</body>
+</html>
