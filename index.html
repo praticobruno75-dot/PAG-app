@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PAG - Fullylife Solutions</title>
+<!-- PWA Manifest -->
+<link rel="manifest" href="./manifest.json">
+<meta name="theme-color" content="#f5a623">
+<link rel="icon" href="./icons/icon-512.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="PAG">
+<link rel="apple-touch-icon" href="./icons/icon-512.png">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+      background: linear-gradient(135deg, #3f3f3f 0%, #2a2a2a 100%);
+      color: #f5f5f5;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+    .brand { text-align: center; margin-bottom: 50px; }
+    .brand a {
+      color: #ba975c;
+      text-decoration: none;
+      font-size: 32px;
+      font-weight: bold;
+      letter-spacing: 3px;
+    }
+    .brand a:hover { opacity: 0.8; }
+    .subtitle { color: #f5a623; font-size: 18px; margin-top: 15px; }
+    .menu-container {
+      background: rgba(47, 47, 47, 0.9);
+      padding: 50px;
+      border-radius: 20px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+      max-width: 500px;
+      width: 100%;
+    }
+    h1 { text-align: center; margin-bottom: 40px; font-size: 28px; color: #f5a623; }
+    .menu-buttons { display: flex; flex-direction: column; gap: 20px; }
+    .menu-btn {
+      padding: 25px;
+      border: none;
+      border-radius: 15px;
+      font-size: 20px;
+      font-weight: bold;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 15px;
+      text-decoration: none;
+      color: #000;
+      transition: all 0.3s ease;
+    }
+    .menu-btn.user { background: linear-gradient(135deg, #f5a623 0%, #ffb84d 100%); }
+    .menu-btn.consultant { background: linear-gradient(135deg, #ba975c 0%, #d4ad6f 100%); }
+    .menu-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(245, 166, 35, 0.4);
+    }
+    .icon { font-size: 28px; }
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal.show { display: flex; }
+    .modal-content {
+      background: #2f2f2f;
+      padding: 40px;
+      border-radius: 15px;
+      max-width: 400px;
+      width: 90%;
+    }
+    .modal h2 { color: #ba975c; margin-bottom: 20px; text-align: center; }
+    .modal input {
+      width: 100%;
+      padding: 15px;
+      border: 2px solid #555;
+      border-radius: 8px;
+      background: #3f3f3f;
+      color: #f5f5f5;
+      font-size: 16px;
+      margin-bottom: 20px;
+    }
+    .modal input:focus { outline: none; border-color: #ba975c; }
+    .modal-buttons { display: flex; gap: 10px; }
+    .modal-btn {
+      flex: 1;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .modal-btn.confirm { background: #ba975c; color: #000; }
+    .modal-btn.cancel { background: #555; color: #f5f5f5; }
+    .modal-btn:hover { transform: translateY(-2px); }
+    .error-message {
+      color: #ff6b6b;
+      text-align: center;
+      margin-top: 10px;
+      display: none;
+    }
+    .error-message.show { display: block; }
+  </style>
+</head>
+<body>
+
+  <div class="brand">
+    <a href="https://www.fullylife.solutions" target="_blank">FULLYLIFE SOLUTIONS</a>
+    <div class="subtitle">Profilo di Appartenenza al Gruppo</div>
+  </div>
+
+  <div class="menu-container">
+    <h1>Seleziona Modalità</h1>
+    
+    <div class="menu-buttons">
+      <a href="utente.html" class="menu-btn user">
+        <span class="icon">👤</span>
+        <span>Utente</span>
+      </a>
+      
+      <button class="menu-btn consultant" onclick="showConsultantModal()">
+        <span class="icon">👨‍💼</span>
+        <span>Consulente</span>
+      </button>
+    </div>
+    
+    <div style="text-align: center; margin-top: 30px;">
+      <a href="./pdf/MANUALE_PAG.pdf" target="_blank" style="
+        color: #f5a623; 
+        text-decoration: none; 
+        font-size: 18px; 
+        padding: 15px 30px; 
+        border: 2px solid #f5a623; 
+        border-radius: 10px; 
+        display: inline-block;
+        transition: all 0.3s;
+      " onmouseover="this.style.background='#f5a623'; this.style.color='#1a1a1a';" 
+         onmouseout="this.style.background='transparent'; this.style.color='#f5a623';">
+        📖 Manuale Utente
+      </a>
+    </div>
+  </div>
+
+  <div class="modal" id="consultantModal">
+    <div class="modal-content">
+      <h2>🔐 Accesso Consulente</h2>
+      <p style="text-align: center; opacity: 0.8; margin-bottom: 20px;">
+        Inserisci il codice di accesso
+      </p>
+      <input type="password" id="consultantCode" placeholder="Codice consulente">
+      <div class="error-message" id="errorMessage">❌ Codice non valido</div>
+      <div class="modal-buttons">
+        <button class="modal-btn cancel" onclick="closeConsultantModal()">Annulla</button>
+        <button class="modal-btn confirm" onclick="checkConsultantCode()">Accedi</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const CONSULTANT_CODE = 'FULLYLIFE2026';
+    
+    function showConsultantModal() {
+      const savedCode = localStorage.getItem('consultantAccess');
+      if (savedCode === CONSULTANT_CODE) {
+        window.location.href = 'consulente.html';
+      } else {
+        document.getElementById('consultantModal').classList.add('show');
+        document.getElementById('consultantCode').focus();
+      }
+    }
+    
+    function closeConsultantModal() {
+      document.getElementById('consultantModal').classList.remove('show');
+      document.getElementById('consultantCode').value = '';
+      document.getElementById('errorMessage').classList.remove('show');
+    }
+    
+    function checkConsultantCode() {
+      const code = document.getElementById('consultantCode').value;
+      if (code === CONSULTANT_CODE) {
+        localStorage.setItem('consultantAccess', code);
+        window.location.href = 'consulente.html';
+      } else {
+        document.getElementById('errorMessage').classList.add('show');
+        document.getElementById('consultantCode').value = '';
+        setTimeout(() => {
+          document.getElementById('errorMessage').classList.remove('show');
+        }, 3000);
+      }
+    }
+    
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('consultantCode').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') checkConsultantCode();
+      });
+    });
+  </script>
+
+<!-- Service Worker Registration -->
+<script>
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./sw.js")
+      .then(reg => console.log("✅ SW registered"))
+      .catch(err => console.log("❌ SW registration failed:", err));
+  });
+}
+</script>
+</body>
+</html>
