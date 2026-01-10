@@ -507,6 +507,15 @@
         width: 100%;
       }
       
+      .appointment-input div {
+        width: 100%;
+      }
+      
+      .appointment-input select {
+        width: 100% !important;
+        flex: 1 !important;
+      }
+      
       .appointment-input button {
         width: 100%;
         padding: 12px;
@@ -2075,9 +2084,11 @@ function updateChart() {
 loadState();
 
 // Popola select ore e minuti
-document.addEventListener('DOMContentLoaded', () => {
+function populateTimeSelects() {
   const hourSelect = document.getElementById('newAppTimeHour');
   const minuteSelect = document.getElementById('newAppTimeMinute');
+  
+  if (!hourSelect || !minuteSelect) return;
   
   for (let h = 0; h < 24; h++) {
     const opt = document.createElement('option');
@@ -2092,7 +2103,10 @@ document.addEventListener('DOMContentLoaded', () => {
     opt.textContent = m.toString().padStart(2, '0');
     minuteSelect.appendChild(opt);
   }
-});
+}
+
+// Chiama subito
+populateTimeSelects();
 </script>
 
 <!-- Service Worker Registration -->
