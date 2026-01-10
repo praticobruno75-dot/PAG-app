@@ -427,15 +427,22 @@
     /* RESPONSIVE MOBILE */
     @media (max-width: 900px) {
       body {
-        padding: 12px;
+        padding: 16px;
+        box-sizing: border-box;
       }
       
       .container {
         max-width: 100%;
+        padding: 0;
+        margin: 0;
       }
       
       .panel {
         padding: 15px;
+        margin-left: 0;
+        margin-right: 0;
+        width: 100%;
+        box-sizing: border-box;
       }
       
       .field {
@@ -545,6 +552,21 @@
       
       .notes-area {
         min-height: 120px;
+        width: 100%;
+        box-sizing: border-box;
+      }
+      
+      textarea {
+        width: 100% !important;
+        box-sizing: border-box;
+      }
+      
+      input[type="text"],
+      input[type="date"],
+      input[type="time"],
+      input[type="number"] {
+        width: 100% !important;
+        box-sizing: border-box;
       }
       
       h1 {
