@@ -966,14 +966,14 @@ function updateSPPDisplay() {
       
       pdfList.forEach(pdf => {
         displayText += `
-          <div style="margin: 10px 0; padding: 12px; background: #2a2a2a; border-radius: 6px; border-left: 3px solid #f5a623;">
-            <a href="./pdf/${pdf.nome}" target="_blank" rel="noopener" style="color: #f5f5f5; text-decoration: none; display: flex; align-items: center; justify-content: space-between; gap: 10px;">
+          <div style="margin: 10px 0; padding: 12px; background: #2a2a2a; border-radius: 6px; border-left: 3px solid #f5a623; cursor: pointer;" onclick="window.open('./pdf/${pdf.nome}', '_blank')">
+            <div style="color: #f5f5f5; text-decoration: none; display: flex; align-items: center; justify-content: space-between; gap: 10px;">
               <div style="display: flex; align-items: center; gap: 10px;">
                 <span style="font-size: 24px;">📕</span>
                 <span style="font-weight: bold;">${pdf.titolo}</span>
               </div>
               <span style="font-size: 20px; opacity: 0.6;">↗️</span>
-            </a>
+            </div>
           </div>`;
       });
       
