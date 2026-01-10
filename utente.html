@@ -905,6 +905,26 @@ function backToHomeFromSPP() {
   loadAppointmentsList();
 }
 
+// Funzione per aprire PDF (compatibile PWA)
+function openPDF(pdfPath) {
+  // Crea link temporaneo
+  const a = document.createElement('a');
+  a.href = pdfPath;
+  a.target = '_blank';
+  a.rel = 'noopener noreferrer';
+  
+  // Aggiungi al DOM temporaneamente
+  document.body.appendChild(a);
+  
+  // Click programmatico
+  a.click();
+  
+  // Rimuovi dopo un momento
+  setTimeout(() => {
+    document.body.removeChild(a);
+  }, 100);
+}
+
 function updateSPPDisplay() {
   const sessualita = document.getElementById('sppSessualita').value;
   const lateralita = document.getElementById('sppLateralita').value;
@@ -962,11 +982,11 @@ function updateSPPDisplay() {
     if (pdfList.length > 0) {
       displayText += '<div style="margin-top: 25px; padding-top: 20px; border-top: 2px solid #f5a623;">';
       displayText += '<p style="color: #f5a623; font-weight: bold; margin-bottom: 8px;">📄 Documenti PDF di Approfondimento:</p>';
-      displayText += '<p style="font-size: 13px; opacity: 0.8; margin-bottom: 15px;">💡 I PDF si aprono in una nuova scheda</p>';
+      displayText += '<p style="font-size: 13px; opacity: 0.8; margin-bottom: 15px;">💡 Clicca per aprire il PDF</p>';
       
       pdfList.forEach(pdf => {
         displayText += `
-          <div style="margin: 10px 0; padding: 12px; background: #2a2a2a; border-radius: 6px; border-left: 3px solid #f5a623; cursor: pointer;" onclick="window.open('./pdf/${pdf.nome}', '_blank')">
+          <div style="margin: 10px 0; padding: 12px; background: #2a2a2a; border-radius: 6px; border-left: 3px solid #f5a623; cursor: pointer;" onclick="openPDF('./pdf/${pdf.nome}')">
             <div style="color: #f5f5f5; text-decoration: none; display: flex; align-items: center; justify-content: space-between; gap: 10px;">
               <div style="display: flex; align-items: center; gap: 10px;">
                 <span style="font-size: 24px;">📕</span>

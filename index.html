@@ -143,7 +143,7 @@
     </div>
     
     <div style="text-align: center; margin-top: 30px;">
-      <button onclick="window.open('./pdf/MANUALE_PAG.pdf', '_blank')" style="
+      <button onclick="openPDF('./pdf/MANUALE_PAG.pdf')" style="
         color: #f5a623; 
         background: transparent;
         text-decoration: none; 
@@ -179,6 +179,16 @@
 
   <script>
     const CONSULTANT_CODE = 'FULLYLIFE2026';
+    
+    function openPDF(pdfPath) {
+      const a = document.createElement('a');
+      a.href = pdfPath;
+      a.target = '_blank';
+      a.rel = 'noopener noreferrer';
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => document.body.removeChild(a), 100);
+    }
     
     function showConsultantModal() {
       const savedCode = localStorage.getItem('consultantAccess');
