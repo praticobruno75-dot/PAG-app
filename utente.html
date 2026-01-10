@@ -607,21 +607,6 @@
   </div>
   
   <div class="panel">
-    <h2>🛡️ Backup & Sicurezza</h2>
-    <p style="font-size: 14px; opacity: 0.8; margin-bottom: 15px;">
-      ⚠️ I dati sono salvati localmente. Fai backup regolari per non perdere nulla!
-    </p>
-    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-      <button onclick="exportFullBackup()" style="flex: 1; min-width: 200px; background: #4CAF50; padding: 12px;">
-        📥 Esporta Backup Completo
-      </button>
-      <button onclick="importFullBackup()" style="flex: 1; min-width: 200px; background: #2196F3; padding: 12px;">
-        📤 Ripristina Backup
-      </button>
-    </div>
-  </div>
-  
-  <div class="panel">
     <h2>Prossimi Appuntamenti</h2>
     <div class="appointment-input">
       <input id="newAppDescription" type="text" placeholder="Descrizione appuntamento">
@@ -967,10 +952,8 @@ function updateSPPDisplay() {
       pdfList.forEach(pdf => {
         displayText += `
           <div style="margin: 10px 0; padding: 12px; background: #2a2a2a; border-radius: 6px; border-left: 3px solid #f5a623;">
-            <a href="./pdf/${pdf.nome}" 
-               target="_blank" 
-               rel="noopener noreferrer"
-               onclick="event.preventDefault(); window.open(this.href, '_blank'); return false;"
+            <a href="./pdf/${pdf.nome}" target="_blank" rel="noopener" 
+               onclick="setTimeout(() => showCloseButton(), 500);"
                style="color: #f5f5f5; text-decoration: none; display: flex; align-items: center; justify-content: space-between; gap: 10px;">
               <div style="display: flex; align-items: center; gap: 10px;">
                 <span style="font-size: 24px;">📕</span>
@@ -992,6 +975,38 @@ function updateSPPDisplay() {
   } else {
     document.getElementById('sppPdfContainer').style.display = 'none';
   }
+}
+
+// Funzione per mostrare pulsante chiudi PDF
+function showCloseButton() {
+  const existing = document.getElementById('pdfCloseBtn');
+  if (existing) existing.remove();
+  
+  const btn = document.createElement('button');
+  btn.id = 'pdfCloseBtn';
+  btn.innerHTML = '✕ Chiudi PDF';
+  btn.style.cssText = `
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    z-index: 999999;
+    background: #f5a623;
+    color: #1a1a1a;
+    border: none;
+    padding: 15px 25px;
+    border-radius: 50px;
+    font-weight: bold;
+    font-size: 16px;
+    box-shadow: 0 4px 20px rgba(245,166,35,0.8);
+    cursor: pointer;
+  `;
+  
+  btn.onclick = () => {
+    history.back();
+    btn.remove();
+  };
+  
+  document.body.appendChild(btn);
 }
 
 function saveSPP() {
@@ -1149,170 +1164,19 @@ function loadProfileList() {
     return;
   }
   
-  // Pulsante selezione multipla
-  const multiSelectBtn = `
-    <div style="margin-bottom: 15px; text-align: right;">
-      <button onclick="toggleMultiSelect()" id="multiSelectBtn" style="
-        background: #ba975c; 
-        padding: 10px 20px; 
-        border: none; 
-        border-radius: 6px; 
-        color: #fff; 
-        font-weight: bold; 
-        cursor: pointer;
-        font-size: 14px;
-      ">
-        ☐ Seleziona multipli
-      </button>
-    </div>
-  `;
-  
-  const profilesHtml = profiles.map((profile, index) => {
-    const exportedBadge = profile.exported ? 
-      `<span style="color: #4CAF50; font-size: 12px; font-weight: bold; display: block; margin-top: 4px;">
-        ✅ Esportato${profile.exportDate ? ' il ' + formatDate(profile.exportDate) : ''}
-      </span>` : '';
-    
-    const exportBtnStyle = profile.exported ? 
-      'background: #4CAF50; opacity: 0.8;' : '';
-    const exportBtnText = profile.exported ? '✅ Esportato' : '📤 Esporta';
-    
-    return `
-      <div class="profile-item" style="${profile.exported ? 'border-left: 3px solid #4CAF50;' : ''} display: flex; align-items: center; gap: 10px;">
-        <input type="checkbox" class="profile-checkbox" data-index="${index}" style="display: none; width: 20px; height: 20px; cursor: pointer;" onchange="updateSelectedCount()">
-        <div class="profile-info" style="flex: 1;">
-          <strong>${profile.description}</strong>
-          ${exportedBadge}
-          <small>${formatDate(profile.date)}</small>
-        </div>
-        <div class="profile-actions">
-          <button onclick="viewProfile(${index})">👁️ Visualizza</button>
-          <button onclick="exportProfileById(${index})" style="${exportBtnStyle}">${exportBtnText}</button>
-          <button class="secondary" onclick="deleteProfile(${index})">🗑️</button>
-        </div>
+  list.innerHTML = profiles.map((profile, index) => `
+    <div class="profile-item">
+      <div class="profile-info">
+        <strong>${profile.description}</strong>
+        <small>${formatDate(profile.date)}</small>
       </div>
-    `;
-  }).join('');
-  
-  // Pulsante export multiplo (nascosto inizialmente)
-  const multiExportBtn = `
-    <div id="multiExportBtn" style="display: none; margin-top: 20px; text-align: center; position: sticky; bottom: 20px; z-index: 100;">
-      <button onclick="exportMultiple()" style="
-        background: #f5a623; 
-        padding: 15px 30px; 
-        border: none; 
-        border-radius: 8px; 
-        color: #1a1a1a; 
-        font-weight: bold; 
-        cursor: pointer;
-        font-size: 16px;
-        box-shadow: 0 4px 12px rgba(245,166,35,0.4);
-      ">
-        📤 Esporta selezionati (<span id="selectedCount">0</span>)
-      </button>
+      <div class="profile-actions">
+        <button onclick="viewProfile(${index})">👁️ Visualizza</button>
+        <button onclick="exportProfileById(${index})">📤 Esporta</button>
+        <button class="secondary" onclick="deleteProfile(${index})">🗑️</button>
+      </div>
     </div>
-  `;
-  
-  list.innerHTML = multiSelectBtn + profilesHtml + multiExportBtn;
-}
-
-let multiSelectMode = false;
-
-function toggleMultiSelect() {
-  multiSelectMode = !multiSelectMode;
-  const checkboxes = document.querySelectorAll('.profile-checkbox');
-  const btn = document.getElementById('multiSelectBtn');
-  const exportBtn = document.getElementById('multiExportBtn');
-  
-  checkboxes.forEach(cb => {
-    cb.style.display = multiSelectMode ? 'inline-block' : 'none';
-    cb.checked = false;
-  });
-  
-  btn.textContent = multiSelectMode ? '✕ Annulla selezione' : '☐ Seleziona multipli';
-  btn.style.background = multiSelectMode ? '#e74c3c' : '#ba975c';
-  exportBtn.style.display = 'none';
-  updateSelectedCount();
-}
-
-function updateSelectedCount() {
-  const checked = document.querySelectorAll('.profile-checkbox:checked');
-  const countSpan = document.getElementById('selectedCount');
-  const exportBtn = document.getElementById('multiExportBtn');
-  
-  if (countSpan) countSpan.textContent = checked.length;
-  if (exportBtn) exportBtn.style.display = checked.length > 0 ? 'block' : 'none';
-}
-
-function exportMultiple() {
-  const checked = Array.from(document.querySelectorAll('.profile-checkbox:checked'));
-  const indices = checked.map(cb => parseInt(cb.dataset.index));
-  
-  if (indices.length === 0) {
-    alert('Seleziona almeno un profilo!');
-    return;
-  }
-  
-  const profiles = state.profiles[currentCategory];
-  const userName = document.getElementById('userName').value || 'Utente';
-  
-  const selectedProfiles = indices.map(i => {
-    const p = profiles[i];
-    return {
-      descrizione: p.description,
-      data: p.date,
-      considerazioni: p.considerations || '',
-      valori: {
-        priorita: p.values[0],
-        intensita: p.values[1],
-        riconoscimento: p.values[2],
-        richieste: p.values[3],
-        contributi: p.values[4],
-        soddisfazione: p.values[5]
-      },
-      spp: {
-        sessualita: state.spp.sessualita || '',
-        lateralita: state.spp.lateralita || '',
-        bisogni: state.spp.bisogni || '',
-        foglietto: state.spp.foglietto || '',
-        intensita: state.spp.intensita || ''
-      }
-    };
-  });
-  
-  const exportData = {
-    utente: userName,
-    exportDate: new Date().toISOString().split('T')[0],
-    categoria: currentCategory,
-    profili: selectedProfiles
-  };
-  
-  const jsonText = JSON.stringify(exportData, null, 2);
-  const fileName = `PAG_${userName}_${currentCategory}_${selectedProfiles.length}profili_${exportData.exportDate}.json`;
-  
-  console.log('[DEBUG] Export multiplo:', selectedProfiles.length, 'profili');
-  
-  // Download
-  const blob = new Blob([jsonText], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = fileName;
-  a.click();
-  URL.revokeObjectURL(url);
-  
-  // Marca tutti come esportati
-  const today = new Date().toISOString().split('T')[0];
-  indices.forEach(i => {
-    state.profiles[currentCategory][i].exported = true;
-    state.profiles[currentCategory][i].exportDate = today;
-  });
-  
-  saveState();
-  toggleMultiSelect(); // Disattiva modalità selezione
-  loadProfileList(); // Aggiorna lista
-  
-  alert(`✅ ${selectedProfiles.length} ${selectedProfiles.length === 1 ? 'profilo esportato' : 'profili esportati'} con successo!`);
+  `).join('');
 }
 
 function loadTimelineCharts() {
@@ -1629,20 +1493,9 @@ function saveProfile() {
     Number(document.getElementById('soddisfazione').value)
   ];
   
-  const profile = { 
-    description, 
-    date, 
-    considerations, 
-    values,
-    exported: false,
-    exportDate: null
-  };
+  const profile = { description, date, considerations, values };
   
   if (currentProfileId !== null) {
-    // Mantieni lo stato exported se esiste
-    const oldProfile = state.profiles[currentCategory][currentProfileId];
-    profile.exported = oldProfile.exported || false;
-    profile.exportDate = oldProfile.exportDate || null;
     state.profiles[currentCategory][currentProfileId] = profile;
   } else {
     state.profiles[currentCategory].push(profile);
@@ -1710,28 +1563,10 @@ function showCopyModal() {
       richieste: values[3],
       contributi: values[4],
       soddisfazione: values[5]
-    },
-    spp: {
-      sessualita: state.spp.sessualita || '',
-      lateralita: state.spp.lateralita || '',
-      bisogni: state.spp.bisogni || '',
-      foglietto: state.spp.foglietto || '',
-      intensita: state.spp.intensita || ''
     }
   };
   
   const jsonText = JSON.stringify(exportData, null, 2);
-  
-  // Marca come esportato (quando l'utente copia)
-  window.markCurrentAsExported = () => {
-    if (currentProfileId !== null) {
-      state.profiles[currentCategory][currentProfileId].exported = true;
-      state.profiles[currentCategory][currentProfileId].exportDate = new Date().toISOString().split('T')[0];
-      saveState();
-      loadProfileList();
-      console.log('[DEBUG] Profilo marcato come exported tramite copia WhatsApp');
-    }
-  };
   
   // Crea modal
   const modal = document.createElement('div');
@@ -1780,7 +1615,7 @@ function showCopyModal() {
       margin-bottom: 15px;
     " id="copyTextArea">${jsonText}</textarea>
     <div style="display: flex; gap: 10px;">
-      <button onclick="selectAllText(); markCurrentAsExported(); this.textContent='✓ Copiato!'; this.style.background='#4CAF50';" style="
+      <button onclick="selectAllText()" style="
         flex: 1;
         padding: 12px;
         background: #f5a623;
@@ -1790,7 +1625,7 @@ function showCopyModal() {
         font-weight: bold;
         cursor: pointer;
       ">✓ Seleziona Tutto</button>
-      <button onclick="this.closest('[style*=fixed]').remove();" style="
+      <button onclick="this.closest('[style*=fixed]').remove()" style="
         flex: 1;
         padding: 12px;
         background: #555;
@@ -1872,13 +1707,6 @@ function exportProfile() {
       richieste: values[3],
       contributi: values[4],
       soddisfazione: values[5]
-    },
-    spp: {
-      sessualita: state.spp.sessualita || '',
-      lateralita: state.spp.lateralita || '',
-      bisogni: state.spp.bisogni || '',
-      foglietto: state.spp.foglietto || '',
-      intensita: state.spp.intensita || ''
     }
   };
   
@@ -1912,29 +1740,11 @@ async function exportProfileById(index) {
       richieste: profile.values[3],
       contributi: profile.values[4],
       soddisfazione: profile.values[5]
-    },
-    spp: {
-      sessualita: state.spp.sessualita || '',
-      lateralita: state.spp.lateralita || '',
-      bisogni: state.spp.bisogni || '',
-      foglietto: state.spp.foglietto || '',
-      intensita: state.spp.intensita || ''
     }
   };
   
   const jsonText = JSON.stringify(exportData, null, 2);
   const fileName = `PAG_${userName}_${profile.description}_${profile.date}.json`;
-  
-  console.log('[DEBUG] Export iniziato per:', profile.description);
-  
-  // Marca come esportato PRIMA - DIRETTAMENTE nello state!
-  state.profiles[currentCategory][index].exported = true;
-  state.profiles[currentCategory][index].exportDate = new Date().toISOString().split('T')[0];
-  saveState();
-  
-  console.log('[DEBUG] Profilo marcato come exported:', 
-    state.profiles[currentCategory][index].exported, 
-    state.profiles[currentCategory][index].exportDate);
   
   // Prova prima con Web Share API (mobile-friendly)
   if (navigator.share && navigator.canShare) {
@@ -1949,26 +1759,19 @@ async function exportProfileById(index) {
           text: `Profilo PAG - ${profile.description}`,
           files: [file]
         });
-        console.log('[DEBUG] Condivisione completata, aggiorno lista');
-        loadProfileList(); // Aggiorna lista per mostrare badge
-        alert('[DEBUG] Export completato! exported=' + state.profiles[currentCategory][index].exported);
         return; // Condivisione riuscita!
       }
     } catch (err) {
       // Se l'utente annulla la condivisione o c'è un errore, continua con fallback
       if (err.name !== 'AbortError') {
-        console.log('[DEBUG] Condivisione fallita:', err.name, err.message);
         console.log('Condivisione non riuscita, uso fallback:', err);
       } else {
-        console.log('[DEBUG] Utente ha annullato condivisione, aggiorno lista');
-        loadProfileList(); // Aggiorna lista anche se annulla
         return; // Utente ha annullato
       }
     }
   }
   
   // Fallback: download classico (per desktop o browser senza Web Share API)
-  console.log('[DEBUG] Uso fallback download');
   const blob = new Blob([jsonText], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -1976,9 +1779,6 @@ async function exportProfileById(index) {
   a.download = fileName;
   a.click();
   URL.revokeObjectURL(url);
-  
-  console.log('[DEBUG] Download completato, aggiorno lista');
-  loadProfileList(); // Aggiorna lista per mostrare badge
 }
 
 function initChart() {
@@ -2063,231 +1863,7 @@ function updateChart() {
   radarChart.update();
 }
 
-// ===== POPUP REMINDER =====
-function checkReminderPopup() {
-  console.log('[DEBUG] checkReminderPopup chiamata');
-  const lastCheck = localStorage.getItem('lastReminderCheck');
-  const today = new Date().toISOString().split('T')[0];
-  
-  console.log('[DEBUG] lastCheck:', lastCheck, 'today:', today);
-  
-  // Mostra popup solo 1 volta al giorno
-  if (lastCheck === today) {
-    console.log('[DEBUG] Popup già mostrato oggi, skip');
-    return;
-  }
-  
-  const reminders = [];
-  const daysSinceThreshold = 30;
-  const todayDate = new Date();
-  
-  ['lavoro', 'famiglia', 'altro'].forEach(category => {
-    const profiles = state.profiles[category];
-    if (profiles && profiles.length > 0) {
-      const sortedProfiles = [...profiles].sort((a,b) => new Date(b.date) - new Date(a.date));
-      const lastProfile = sortedProfiles[0];
-      const daysSince = Math.floor((todayDate - new Date(lastProfile.date)) / (1000*60*60*24));
-      
-      console.log(`[DEBUG] ${category}: ultimo profilo ${daysSince} giorni fa`);
-      
-      if (daysSince >= daysSinceThreshold) {
-        reminders.push({ category, daysSince });
-      }
-    }
-  });
-  
-  console.log('[DEBUG] Reminders trovati:', reminders.length);
-  
-  if (reminders.length === 0) {
-    console.log('[DEBUG] Nessun reminder da mostrare');
-    return;
-  }
-  
-  localStorage.setItem('lastReminderCheck', today);
-  console.log('[DEBUG] Mostro popup!');
-  showReminderPopup(reminders);
-}
-
-function showReminderPopup(reminders) {
-  const categoryNames = { 
-    lavoro: '💼 Lavoro', 
-    famiglia: '👨‍👩‍👧‍👦 Famiglia', 
-    altro: '✨ Altro' 
-  };
-  
-  // Se c'è solo 1 categoria scaduta, vai direttamente lì
-  const targetCategory = reminders.length === 1 ? reminders[0].category : null;
-  
-  const modal = document.createElement('div');
-  modal.style.cssText = `
-    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0,0,0,0.9); display: flex; align-items: center;
-    justify-content: center; z-index: 10000; padding: 20px;
-  `;
-  
-  const content = document.createElement('div');
-  content.style.cssText = `
-    background: #2f2f2f; padding: 30px; border-radius: 12px;
-    max-width: 400px; width: 100%; border: 2px solid #f5a623;
-  `;
-  
-  const createButtonAction = targetCategory 
-    ? `this.closest('[style*=fixed]').remove(); selectCategory('${targetCategory}');`
-    : `this.closest('[style*=fixed]').remove();`;
-  
-  content.innerHTML = `
-    <h2 style="color: #f5a623; margin-top: 0; text-align: center;">⏰ Promemoria</h2>
-    <p style="margin-bottom: 20px; text-align: center;">È passato del tempo dall'ultimo profilo!</p>
-    ${reminders.map(r => `
-      <div style="background: #1a1a1a; padding: 12px; border-radius: 6px; margin: 10px 0; border-left: 3px solid #f5a623;">
-        <strong>${categoryNames[r.category]}</strong><br>
-        <small style="opacity: 0.8;">Ultimo profilo: ${r.daysSince} giorni fa</small>
-      </div>
-    `).join('')}
-    <div style="margin-top: 20px; display: flex; gap: 10px;">
-      <button onclick="${createButtonAction}" 
-        style="flex: 1; padding: 12px; background: #f5a623; color: #1a1a1a; border: none; 
-        border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 14px;">
-        📝 Crea Profilo
-      </button>
-      <button onclick="this.closest('[style*=fixed]').remove();" 
-        style="flex: 1; padding: 12px; background: #3f3f3f; color: #f5f5f5; border: none; 
-        border-radius: 6px; cursor: pointer; font-size: 14px;">
-        Chiudi
-      </button>
-    </div>
-  `;
-  
-  modal.appendChild(content);
-  document.body.appendChild(modal);
-}
-
 loadState();
-checkReminderPopup();
-
-// Funzione di test per sviluppatori (accessibile dalla console)
-window.testPopup = function() {
-  localStorage.removeItem('lastReminderCheck');
-  checkReminderPopup();
-};
-window.forcePopup = function() {
-  const reminders = [{ category: 'lavoro', daysSince: 35 }];
-  showReminderPopup(reminders);
-};
-
-// ===== BACKUP & RESTORE =====
-function exportFullBackup() {
-  const userName = document.getElementById('userName').value || 'Utente';
-  const backupData = {
-    version: '1.0',
-    exportDate: new Date().toISOString(),
-    userName: userName,
-    state: state,
-    spp: state.spp
-  };
-  
-  const jsonText = JSON.stringify(backupData, null, 2);
-  const fileName = `PAG_Backup_Completo_${userName}_${new Date().toISOString().split('T')[0]}.json`;
-  
-  const blob = new Blob([jsonText], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = fileName;
-  a.click();
-  URL.revokeObjectURL(url);
-  
-  // Salva data ultimo backup
-  localStorage.setItem('lastBackupDate', new Date().toISOString().split('T')[0]);
-  
-  alert('✅ Backup completo esportato!\n\nConserva questo file in un luogo sicuro.');
-}
-
-function importFullBackup() {
-  const input = document.createElement('input');
-  input.type = 'file';
-  input.accept = '.json';
-  
-  input.onchange = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      try {
-        const backupData = JSON.parse(event.target.result);
-        
-        if (!backupData.state) {
-          alert('❌ File non valido: non è un backup PAG');
-          return;
-        }
-        
-        if (!confirm('⚠️ ATTENZIONE!\n\nIl ripristino sovrascriverà TUTTI i dati attuali.\n\nContinuare?')) {
-          return;
-        }
-        
-        // Ripristina tutto
-        state.profiles = backupData.state.profiles;
-        state.spp = backupData.state.spp || backupData.spp;
-        state.appointments = backupData.state.appointments || [];
-        
-        saveState();
-        
-        // Aggiorna nome utente se presente
-        if (backupData.userName) {
-          document.getElementById('userName').value = backupData.userName;
-        }
-        
-        alert(`✅ Backup ripristinato con successo!\n\nData backup: ${new Date(backupData.exportDate).toLocaleDateString()}\n\nRicarico la pagina...`);
-        
-        // Ricarica pagina per applicare tutto
-        setTimeout(() => location.reload(), 1000);
-        
-      } catch (err) {
-        console.error('Errore import backup:', err);
-        alert('❌ Errore nel file di backup.\n\nAssicurati di aver selezionato un file valido.');
-      }
-    };
-    reader.readAsText(file);
-  };
-  
-  input.click();
-}
-
-function checkBackupReminder() {
-  const lastBackup = localStorage.getItem('lastBackupDate');
-  const today = new Date();
-  
-  if (!lastBackup) {
-    // Primo accesso, imposta data di oggi
-    localStorage.setItem('lastBackupDate', today.toISOString().split('T')[0]);
-    return;
-  }
-  
-  const lastBackupDate = new Date(lastBackup);
-  const daysSinceBackup = Math.floor((today - lastBackupDate) / (1000 * 60 * 60 * 24));
-  
-  // Mostra reminder ogni 30 giorni
-  if (daysSinceBackup >= 30) {
-    const lastReminder = localStorage.getItem('lastBackupReminder');
-    const todayStr = today.toISOString().split('T')[0];
-    
-    // Mostra solo 1 volta al giorno
-    if (lastReminder === todayStr) return;
-    
-    localStorage.setItem('lastBackupReminder', todayStr);
-    
-    setTimeout(() => {
-      if (confirm(`⚠️ PROMEMORIA BACKUP\n\nSono passati ${daysSinceBackup} giorni dall'ultimo backup.\n\nVuoi fare un backup adesso?`)) {
-        exportFullBackup();
-      }
-    }, 3000); // Dopo 3 secondi dall'apertura
-  }
-}
-
-// Avvia check backup
-checkBackupReminder();
-
 </script>
 
 <!-- Service Worker Registration -->
