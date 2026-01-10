@@ -181,34 +181,51 @@
     const CONSULTANT_CODE = 'FULLYLIFE2026';
     
     function openPDF(pdfPath) {
-      const overlay = document.createElement('div');
-      overlay.style.cssText = `
+      const modal = document.createElement('div');
+      modal.style.cssText = `
         position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-        background: #1a1a1a; z-index: 10000; display: flex; flex-direction: column;
+        background: rgba(0,0,0,0.9); z-index: 10000; display: flex;
+        align-items: center; justify-content: center; padding: 20px;
+      `;
+      
+      const content = document.createElement('div');
+      content.style.cssText = `
+        background: #2f2f2f; border-radius: 12px; max-width: 95%;
+        max-height: 90%; width: 100%; display: flex; flex-direction: column;
+        border: 2px solid #f5a623;
       `;
       
       const header = document.createElement('div');
       header.style.cssText = `
-        background: #2f2f2f; padding: 15px; display: flex;
-        justify-content: space-between; align-items: center;
+        padding: 15px 20px; display: flex; justify-content: space-between;
+        align-items: center; background: #2f2f2f; border-radius: 12px 12px 0 0;
         border-bottom: 2px solid #f5a623;
       `;
       
       header.innerHTML = `
-        <span style="color: #f5a623; font-weight: bold;">📖 Manuale</span>
+        <span style="color: #f5a623; font-weight: bold; font-size: 16px;">📖 Manuale</span>
         <button onclick="this.closest('[style*=fixed]').remove()" style="
           background: #f5a623; color: #1a1a1a; border: none;
-          padding: 10px 20px; border-radius: 6px; font-weight: bold;
+          padding: 8px 20px; border-radius: 6px; font-weight: bold;
           cursor: pointer; font-size: 16px;">✕ Chiudi</button>
       `;
       
       const iframe = document.createElement('iframe');
       iframe.src = pdfPath;
-      iframe.style.cssText = `flex: 1; width: 100%; border: none; background: white;`;
+      iframe.style.cssText = `
+        width: 100%; height: 70vh; border: none; background: white;
+        border-radius: 0 0 12px 12px;
+      `;
       
-      overlay.appendChild(header);
-      overlay.appendChild(iframe);
-      document.body.appendChild(overlay);
+      content.appendChild(header);
+      content.appendChild(iframe);
+      modal.appendChild(content);
+      
+      modal.onclick = (e) => {
+        if (e.target === modal) modal.remove();
+      };
+      
+      document.body.appendChild(modal);
     }
     
     function showConsultantModal() {
