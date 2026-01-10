@@ -3,6 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
   <title>Profilo di appartenenza al gruppo</title>
 <!-- PWA Manifest -->
 <link rel="manifest" href="./manifest.json">
@@ -571,6 +573,23 @@
         max-width: 100%;
         height: auto !important;
       }
+    }
+    
+    /* Supporto rotazione schermo */
+    @media screen and (orientation: landscape) {
+      body {
+        padding: 12px;
+      }
+      .panel {
+        margin-bottom: 15px;
+      }
+    }
+    
+    /* Forza rotazione per PWA */
+    html {
+      width: 100vw;
+      height: 100vh;
+      overflow: auto;
     }
   </style>
 </head>
