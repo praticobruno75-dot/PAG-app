@@ -143,7 +143,11 @@
     </div>
     
     <div style="text-align: center; margin-top: 30px;">
-      <button onclick="openPDF('./pdf/MANUALE_PAG.pdf')" style="
+      <a href="./pdf/MANUALE_PAG.pdf" 
+         target="_blank" 
+         rel="noopener noreferrer"
+         onclick="event.preventDefault(); window.open(this.href, '_blank'); return false;"
+         style="
         color: #f5a623; 
         background: transparent;
         text-decoration: none; 
@@ -154,11 +158,10 @@
         display: inline-block;
         transition: all 0.3s;
         cursor: pointer;
-        font-family: inherit;
       " onmouseover="this.style.background='#f5a623'; this.style.color='#1a1a1a';" 
          onmouseout="this.style.background='transparent'; this.style.color='#f5a623';">
         📖 Manuale Utente
-      </button>
+      </a>
     </div>
   </div>
 
@@ -179,54 +182,6 @@
 
   <script>
     const CONSULTANT_CODE = 'FULLYLIFE2026';
-    
-    function openPDF(pdfPath) {
-      const modal = document.createElement('div');
-      modal.style.cssText = `
-        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-        background: rgba(0,0,0,0.9); z-index: 10000; display: flex;
-        align-items: center; justify-content: center; padding: 20px;
-      `;
-      
-      const content = document.createElement('div');
-      content.style.cssText = `
-        background: #2f2f2f; border-radius: 12px; max-width: 95%;
-        max-height: 90%; width: 100%; display: flex; flex-direction: column;
-        border: 2px solid #f5a623;
-      `;
-      
-      const header = document.createElement('div');
-      header.style.cssText = `
-        padding: 15px 20px; display: flex; justify-content: space-between;
-        align-items: center; background: #2f2f2f; border-radius: 12px 12px 0 0;
-        border-bottom: 2px solid #f5a623;
-      `;
-      
-      header.innerHTML = `
-        <span style="color: #f5a623; font-weight: bold; font-size: 16px;">📖 Manuale</span>
-        <button onclick="this.closest('[style*=fixed]').remove()" style="
-          background: #f5a623; color: #1a1a1a; border: none;
-          padding: 8px 20px; border-radius: 6px; font-weight: bold;
-          cursor: pointer; font-size: 16px;">✕ Chiudi</button>
-      `;
-      
-      const iframe = document.createElement('iframe');
-      iframe.src = pdfPath;
-      iframe.style.cssText = `
-        width: 100%; height: 70vh; border: none; background: white;
-        border-radius: 0 0 12px 12px;
-      `;
-      
-      content.appendChild(header);
-      content.appendChild(iframe);
-      modal.appendChild(content);
-      
-      modal.onclick = (e) => {
-        if (e.target === modal) modal.remove();
-      };
-      
-      document.body.appendChild(modal);
-    }
     
     function showConsultantModal() {
       const savedCode = localStorage.getItem('consultantAccess');
