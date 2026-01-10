@@ -658,7 +658,14 @@
     <div class="appointment-input">
       <input id="newAppDescription" type="text" placeholder="Descrizione appuntamento">
       <input id="newAppDate" type="date">
-      <input id="newAppTime" type="time">
+      <div style="display: flex; gap: 8px;">
+        <select id="newAppTimeHour" style="flex: 1; padding: 8px; border-radius: 6px; border: 1px solid #555; background: #3f3f3f; color: #f5f5f5;">
+          <option value="">Ora</option>
+        </select>
+        <select id="newAppTimeMinute" style="flex: 1; padding: 8px; border-radius: 6px; border: 1px solid #555; background: #3f3f3f; color: #f5f5f5;">
+          <option value="">Min</option>
+        </select>
+      </div>
       <button onclick="addAppointment()">➕</button>
     </div>
     <div id="appointmentsList"></div>
@@ -1277,12 +1284,15 @@ function loadReminders() {
 function addAppointment() {
   const description = document.getElementById('newAppDescription').value;
   const date = document.getElementById('newAppDate').value;
-  const time = document.getElementById('newAppTime').value;
+  const hour = document.getElementById('newAppTimeHour').value;
+  const minute = document.getElementById('newAppTimeMinute').value;
   
-  if (!description || !date || !time) {
+  if (!description || !date || !hour || !minute) {
     alert('Compila tutti i campi dell\'appuntamento');
     return;
   }
+  
+  const time = `${hour}:${minute}`;
   
   state.appointments.push({ description, date, time });
   state.appointments.sort((a, b) => {
@@ -1296,7 +1306,8 @@ function addAppointment() {
   
   document.getElementById('newAppDescription').value = '';
   document.getElementById('newAppDate').value = '';
-  document.getElementById('newAppTime').value = '';
+  document.getElementById('newAppTimeHour').value = '';
+  document.getElementById('newAppTimeMinute').value = '';
 }
 
 function loadAppointmentsList() {
@@ -2062,6 +2073,26 @@ function updateChart() {
 }
 
 loadState();
+
+// Popola select ore e minuti
+document.addEventListener('DOMContentLoaded', () => {
+  const hourSelect = document.getElementById('newAppTimeHour');
+  const minuteSelect = document.getElementById('newAppTimeMinute');
+  
+  for (let h = 0; h < 24; h++) {
+    const opt = document.createElement('option');
+    opt.value = h.toString().padStart(2, '0');
+    opt.textContent = h.toString().padStart(2, '0');
+    hourSelect.appendChild(opt);
+  }
+  
+  for (let m = 0; m < 60; m += 5) {
+    const opt = document.createElement('option');
+    opt.value = m.toString().padStart(2, '0');
+    opt.textContent = m.toString().padStart(2, '0');
+    minuteSelect.appendChild(opt);
+  }
+});
 </script>
 
 <!-- Service Worker Registration -->

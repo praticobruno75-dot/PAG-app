@@ -459,6 +459,18 @@
         font-size: 15px;
       }
       
+      .category-buttons {
+        grid-template-columns: 1fr;
+        gap: 12px;
+        margin: 15px 0;
+      }
+      
+      .category-btn {
+        width: 100%;
+        padding: 20px;
+        font-size: 18px;
+      }
+      
       .notes-area {
         min-height: 120px;
         width: 100%;
@@ -620,7 +632,14 @@
     <div class="appointment-input">
       <input id="newAppName" type="text" placeholder="Nome persona">
       <input id="newAppDate" type="date">
-      <input id="newAppTime" type="time">
+      <div style="display: flex; gap: 8px;">
+        <select id="newAppTimeHour" style="flex: 1; padding: 8px; border-radius: 6px; border: 1px solid #555; background: #3f3f3f; color: #f5f5f5;">
+          <option value="">Ora</option>
+        </select>
+        <select id="newAppTimeMinute" style="flex: 1; padding: 8px; border-radius: 6px; border: 1px solid #555; background: #3f3f3f; color: #f5f5f5;">
+          <option value="">Min</option>
+        </select>
+      </div>
       <button onclick="addAppointment()">➕</button>
     </div>
     <div id="appointmentsList"></div>
@@ -966,12 +985,15 @@ function updateDashboard() {
 function addAppointment() {
   const name = document.getElementById('newAppName').value;
   const date = document.getElementById('newAppDate').value;
-  const time = document.getElementById('newAppTime').value;
+  const hour = document.getElementById('newAppTimeHour').value;
+  const minute = document.getElementById('newAppTimeMinute').value;
   
-  if (!name || !date || !time) {
+  if (!name || !date || !hour || !minute) {
     alert('Compila tutti i campi dell\'appuntamento');
     return;
   }
+  
+  const time = `${hour}:${minute}`;
   
   state.appointments.push({ name, date, time });
   state.appointments.sort((a, b) => {
@@ -986,7 +1008,8 @@ function addAppointment() {
   // Reset form
   document.getElementById('newAppName').value = '';
   document.getElementById('newAppDate').value = '';
-  document.getElementById('newAppTime').value = '';
+  document.getElementById('newAppTimeHour').value = '';
+  document.getElementById('newAppTimeMinute').value = '';
 }
 
 function loadAppointmentsList() {
@@ -2089,6 +2112,26 @@ function formatDate(dateString) {
 }
 
 loadState();
+
+// Popola select ore e minuti
+document.addEventListener('DOMContentLoaded', () => {
+  const hourSelect = document.getElementById('newAppTimeHour');
+  const minuteSelect = document.getElementById('newAppTimeMinute');
+  
+  for (let h = 0; h < 24; h++) {
+    const opt = document.createElement('option');
+    opt.value = h.toString().padStart(2, '0');
+    opt.textContent = h.toString().padStart(2, '0');
+    hourSelect.appendChild(opt);
+  }
+  
+  for (let m = 0; m < 60; m += 5) {
+    const opt = document.createElement('option');
+    opt.value = m.toString().padStart(2, '0');
+    opt.textContent = m.toString().padStart(2, '0');
+    minuteSelect.appendChild(opt);
+  }
+});
 
 // ===== BACKUP & RESTORE CONSULENTE =====
 function exportFullBackupConsulente() {
